@@ -88,20 +88,25 @@ export default function PaymentModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center">
-      <div className="w-full max-w-md bg-dark-lighter rounded-xl shadow-xl">
+    <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4 overflow-y-auto">
+      <div className="w-full max-w-md bg-dark-lighter rounded-xl shadow-xl relative mx-auto my-auto">
+        {/* Prominent Close Button at Top Right */}
+        <button 
+          className="absolute top-3 right-3 z-10 bg-dark-card hover:bg-dark-lighter rounded-full p-2 text-light-dimmed hover:text-light transition-colors"
+          onClick={closeModal}
+          aria-label="Close payment modal"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        
         <div className="p-4 border-b border-gray-800 flex justify-between items-center">
-          <h3 className="font-semibold">Complete Your Subscription</h3>
-          <button 
-            className="text-light-dimmed hover:text-light"
-            onClick={closeModal}
-            aria-label="Close payment modal"
-          >
-            <i className="ri-close-line text-xl"></i>
-          </button>
+          <h3 className="font-semibold text-lg">Complete Your Subscription</h3>
         </div>
         
-        <div className="p-6">
+        <div className="p-4 sm:p-6 overflow-y-auto max-h-[80vh]">
           <div className="mb-6">
             <h4 className="text-lg font-semibold mb-2">{plans[selectedPlan as keyof typeof plans].name}</h4>
             <p className="text-light-dimmed">${plans[selectedPlan as keyof typeof plans].price} per month</p>
@@ -110,65 +115,70 @@ export default function PaymentModal() {
             </div>
           </div>
           
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="mb-4">
-              <label className="block text-light-dimmed text-sm mb-2">Card Number</label>
+              <label className="block text-light-dimmed text-sm mb-2 font-medium">Card Number</label>
               <input 
                 type="text" 
                 placeholder="1234 5678 9012 3456" 
-                className="w-full bg-dark-card text-light rounded-lg px-4 py-2 outline-none border border-gray-800" 
+                className="w-full bg-dark-card text-light rounded-lg px-4 py-3 outline-none border border-gray-800 focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-base" 
                 value={cardNumber}
                 onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
                 maxLength={19}
+                inputMode="numeric"
               />
             </div>
             
-            <div className="flex space-x-4 mb-4">
-              <div className="flex-1">
-                <label className="block text-light-dimmed text-sm mb-2">Expiry Date</label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-light-dimmed text-sm mb-2 font-medium">Expiry Date</label>
                 <input 
                   type="text" 
                   placeholder="MM/YY" 
-                  className="w-full bg-dark-card text-light rounded-lg px-4 py-2 outline-none border border-gray-800" 
+                  className="w-full bg-dark-card text-light rounded-lg px-4 py-3 outline-none border border-gray-800 focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-base" 
                   value={expiryDate}
                   onChange={(e) => setExpiryDate(formatExpiryDate(e.target.value))}
                   maxLength={5}
+                  inputMode="numeric"
                 />
               </div>
-              <div className="flex-1">
-                <label className="block text-light-dimmed text-sm mb-2">CVC</label>
+              <div>
+                <label className="block text-light-dimmed text-sm mb-2 font-medium">CVC</label>
                 <input 
                   type="text" 
                   placeholder="123" 
-                  className="w-full bg-dark-card text-light rounded-lg px-4 py-2 outline-none border border-gray-800" 
+                  className="w-full bg-dark-card text-light rounded-lg px-4 py-3 outline-none border border-gray-800 focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-base" 
                   value={cvc}
                   onChange={(e) => setCvc(e.target.value.replace(/\D/g, ''))}
                   maxLength={3}
+                  inputMode="numeric"
                 />
               </div>
             </div>
             
             <div className="mb-6">
-              <label className="block text-light-dimmed text-sm mb-2">Name on Card</label>
+              <label className="block text-light-dimmed text-sm mb-2 font-medium">Name on Card</label>
               <input 
                 type="text" 
                 placeholder="John Doe" 
-                className="w-full bg-dark-card text-light rounded-lg px-4 py-2 outline-none border border-gray-800" 
+                className="w-full bg-dark-card text-light rounded-lg px-4 py-3 outline-none border border-gray-800 focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-base" 
                 value={nameOnCard}
                 onChange={(e) => setNameOnCard(e.target.value)}
               />
             </div>
             
-            <div className="flex items-center mb-6">
-              <input 
-                type="checkbox" 
-                id="terms" 
-                className="mr-2"
-                checked={agreedToTerms}
-                onChange={(e) => setAgreedToTerms(e.target.checked)} 
-              />
-              <label htmlFor="terms" className="text-light-dimmed text-sm">
-                I agree to the <a href="#" className="text-primary">Terms of Service</a> and <a href="#" className="text-primary">Privacy Policy</a>
+            <div className="flex items-start mb-6">
+              <div className="flex items-center h-5">
+                <input 
+                  type="checkbox" 
+                  id="terms" 
+                  className="w-4 h-4 mr-2 accent-primary"
+                  checked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)} 
+                />
+              </div>
+              <label htmlFor="terms" className="text-light-dimmed text-sm ml-2">
+                I agree to the <a href="#" className="text-primary hover:underline">Terms of Service</a> and <a href="#" className="text-primary hover:underline">Privacy Policy</a>
               </label>
             </div>
             
@@ -176,7 +186,7 @@ export default function PaymentModal() {
               type="submit" 
               className={`w-full ${isSubmitting 
                 ? 'bg-primary-dark cursor-not-allowed' 
-                : 'bg-primary hover:bg-primary-dark'} text-white py-3 rounded-lg transition flex items-center justify-center`}
+                : 'bg-primary hover:bg-primary-dark'} text-white py-4 rounded-lg transition flex items-center justify-center font-medium text-base shadow-lg`}
               disabled={isSubmitting}
             >
               {isSubmitting ? (
@@ -190,20 +200,25 @@ export default function PaymentModal() {
               ) : "Subscribe Now"}
             </button>
             
-            <div className="mt-6 border-t border-gray-800 pt-4">
-              <div className="text-center mb-4 text-sm text-light-dimmed">
+            <div className="mt-8 border-t border-gray-800 pt-6">
+              <div className="text-center mb-5 text-sm text-light-dimmed font-medium">
                 <span>Or pay with</span>
               </div>
               
               {/* PayPal Button Component */}
-              <PayPalButton
-                amount={plans[selectedPlan as keyof typeof plans].price.toString()}
-                currency="USD"
-                intent="CAPTURE"
-              />
+              <div className="mx-auto max-w-sm">
+                <PayPalButton
+                  amount={plans[selectedPlan as keyof typeof plans].price.toString()}
+                  currency="USD"
+                  intent="CAPTURE"
+                />
+              </div>
               
               <div className="mt-4 flex items-center justify-center text-sm text-light-dimmed">
-                <i className="ri-lock-line mr-2"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
                 <span>Secure payment processed by PayPal</span>
               </div>
               
@@ -211,7 +226,7 @@ export default function PaymentModal() {
               <button 
                 type="button"
                 onClick={closeModal}
-                className="w-full mt-6 bg-dark-card hover:bg-dark-lighter text-light py-3 rounded-lg transition flex items-center justify-center"
+                className="w-full mt-6 bg-dark-card hover:bg-dark-lighter text-light py-3 rounded-lg transition flex items-center justify-center font-medium text-sm"
               >
                 Cancel
               </button>
