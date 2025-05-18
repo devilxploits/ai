@@ -6,8 +6,10 @@ export default function MobileHeader() {
   const { isAuthenticated } = useAuth();
 
   return (
-    <div className="lg:hidden bg-dark-lighter p-4 flex justify-between items-center border-b border-gray-800 sticky top-0 z-50">
-      <div className="flex items-center space-x-2">
+    <div
+  className="lg:hidden p-4 flex justify-between items-center border-b border-gray-800 sticky top-0 z-50"
+  style={{ backgroundColor: "#121212" }}>
+    <div className="flex items-center space-x-2">
         <span className="text-primary font-display text-xl">Sophia</span>
       </div>
       <div className="flex items-center space-x-4">
