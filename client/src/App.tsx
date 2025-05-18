@@ -7,6 +7,7 @@ import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/HomePage";
 import PhotosPage from "@/pages/PhotosPage";
 import VideosPage from "@/pages/VideosPage";
+import PostsPage from "@/pages/PostsPage";
 import AdminPanel from "@/pages/AdminPanel";
 import LoginPage from "@/pages/LoginPage";
 import SettingsPage from "@/pages/SettingsPage";
@@ -22,6 +23,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={HomePage} />
+      <Route path="/posts" component={PostsPage} />
       <Route path="/photos" component={PhotosPage} />
       <Route path="/videos" component={VideosPage} />
       <Route path="/login">
