@@ -9,10 +9,12 @@ import PhotosPage from "@/pages/PhotosPage";
 import VideosPage from "@/pages/VideosPage";
 import AdminPanel from "@/pages/AdminPanel";
 import LoginPage from "@/pages/LoginPage";
+import SettingsPage from "@/pages/SettingsPage";
 import Layout from "@/components/Layout";
 import { useAuth } from "@/context/AuthContext";
 import { ModalProvider } from "@/context/ModalContext";
 import { AuthProvider } from "@/context/AuthContext";
+import ModalRedirectPage from "@/pages/ModalRedirectPage";
 
 function Router() {
   const { isAuthenticated, isAdmin } = useAuth();
@@ -26,7 +28,20 @@ function Router() {
         {() => (isAuthenticated ? <HomePage /> : <LoginPage />)}
       </Route>
       <Route path="/admin">
-        {() => (isAdmin ? <AdminPanel /> : <LoginPage />)}
+        {() => (isAdmin ? <AdminPanel /> : <HomePage />)}
+      </Route>
+      <Route path="/settings">
+        {() => (isAuthenticated ? <SettingsPage /> : <LoginPage />)}
+      </Route>
+      {/* Modal redirect pages */}
+      <Route path="/chat">
+        {() => <ModalRedirectPage modalName="chat" title="Chat with Sophia" />}
+      </Route>
+      <Route path="/calls">
+        {() => <ModalRedirectPage modalName="call" title="Voice Call with Sophia" />}
+      </Route>
+      <Route path="/subscription">
+        {() => <ModalRedirectPage modalName="payment" title="Sophia Subscription" />}
       </Route>
       <Route component={NotFound} />
     </Switch>
