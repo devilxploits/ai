@@ -102,7 +102,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Username and password are required" });
       }
       
+      // We've already made getUserByUsername case-insensitive
       const user = await storage.getUserByUsername(username);
+      
+      // Add some debug logging
+      console.log("Login attempt:", { 
+        username, 
+        userFound: !!user, 
+        passwordMatch: user ? user.password === password : false 
+      });
       
       if (!user || user.password !== password) {
         return res.status(401).json({ message: "Invalid credentials" });
@@ -119,6 +127,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(userWithoutPassword);
     } catch (error) {
+      console.error("Login error:", error);
       res.status(500).json({ message: "Error logging in" });
     }
   });
