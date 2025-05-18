@@ -52,10 +52,8 @@ export default function PhotoGallery() {
     <div className="mb-8">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-display font-semibold">Photos</h2>
-        <Link href="/photos">
-          <a className="text-primary text-sm flex items-center">
-            View All <i className="ri-arrow-right-line ml-1"></i>
-          </a>
+        <Link href="/photos" className="text-primary text-sm flex items-center">
+          View All <i className="ri-arrow-right-line ml-1"></i>
         </Link>
       </div>
       
@@ -143,7 +141,7 @@ function PhotoItem({ photo }: PhotoItemProps) {
               <i className={`${liked ? 'ri-heart-fill' : 'ri-heart-line'} text-xl`}></i>
             </button>
             <span className="text-light-dimmed">
-              {liked ? photo.likes + 1 : photo.likes} likes
+              {liked ? (photo.likes || 0) + 1 : (photo.likes || 0)} likes
             </span>
           </div>
           <button

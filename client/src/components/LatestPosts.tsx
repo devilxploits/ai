@@ -3,7 +3,6 @@ import { Link } from 'wouter';
 import { getPosts } from '@/lib/api';
 import { useQuery } from '@tanstack/react-query';
 import type { Post } from '@shared/schema';
-import { formatDistanceToNow } from 'date-fns';
 
 export default function LatestPosts() {
   const { data: posts, isLoading, error } = useQuery({
@@ -56,10 +55,8 @@ export default function LatestPosts() {
     <div className="mb-8">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-display font-semibold">Latest Posts</h2>
-        <Link href="/posts">
-          <a className="text-primary text-sm flex items-center">
-            View All <i className="ri-arrow-right-line ml-1"></i>
-          </a>
+        <Link href="/posts" className="text-primary text-sm flex items-center">
+          View All <i className="ri-arrow-right-line ml-1"></i>
         </Link>
       </div>
       
@@ -88,8 +85,8 @@ function PostCard({ post }: PostCardProps) {
       {/* Post image */}
       <div className="h-48 overflow-hidden">
         <img 
-          src={post.imageUrl} 
-          alt={post.title} 
+          src={post.imageUrl || ''} 
+          alt={post.title || 'Post image'} 
           className="w-full h-full object-cover" 
         />
       </div>
@@ -98,14 +95,14 @@ function PostCard({ post }: PostCardProps) {
       <div className="p-4">
         <div className="flex items-center justify-between mb-2">
           <span className="text-light-dimmed text-sm">
-            {post.timestamp ? formatDistanceToNow(new Date(post.timestamp), { addSuffix: true }) : 'Recently'}
+            {post.timestamp ? new Date(post.timestamp).toLocaleDateString() : 'Recently'}
           </span>
           <div className="flex items-center space-x-3">
             <span className="flex items-center text-light-dimmed text-sm">
-              <i className="ri-heart-line mr-1"></i> {post.likes}
+              <i className="ri-heart-line mr-1"></i> {post.likes || 0}
             </span>
             <span className="flex items-center text-light-dimmed text-sm">
-              <i className="ri-chat-1-line mr-1"></i> {post.comments}
+              <i className="ri-chat-1-line mr-1"></i> {post.comments || 0}
             </span>
           </div>
         </div>
