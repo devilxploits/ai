@@ -117,8 +117,8 @@ export default function ChatModal() {
   };
 
   // Format message timestamp
-  const formatMessageTime = (timestamp: Date) => {
-    if (!timestamp) return "";
+  const formatMessageTime = (timestamp: Date | null) => {
+    if (!timestamp) return "Just now";
     try {
       const date = new Date(timestamp);
       const now = new Date();
@@ -139,6 +139,8 @@ export default function ChatModal() {
   // Use WebRTC hook for call functionality
   const { startCall, endCall, toggleMute, formattedDuration } = useWebRTC();
 
+  const { openModal } = useModal();
+  
   const handleStartCall = () => {
     if (!isPaid && user) {
       toast({
@@ -149,7 +151,7 @@ export default function ChatModal() {
       // Show upgrade prompt
       setTimeout(() => {
         closeModal();
-        useModal().openModal('payment');
+        openModal('payment');
       }, 100);
       return;
     }
@@ -167,7 +169,7 @@ export default function ChatModal() {
     <div className="fixed inset-0 z-50 bg-black/70 flex flex-col">
       <div className="fixed inset-0 z-50 bg-[#000000b0] flex flex-col">
       {/* Chat Header */}
-        <div className="p-4 border-b border-gray-800 flex justify-between items-center">
+        <div className="p-4 border-b border-gray-800 flex justify-between items-center bg-dark-lighter">
           <div className="flex items-center">
             <div className="w-10 h-10 rounded-full overflow-hidden mr-3">
               <img 
@@ -277,7 +279,7 @@ export default function ChatModal() {
             )}
             
             {/* Subscription Prompt (For Free Users) */}
-            {!isPaid && user && user.messageCount >= 1 && (
+            {!isPaid && user && user.messageCount && user.messageCount >= 1 && (
               <div className="bg-dark-card rounded-xl p-4 my-6 border border-primary border-opacity-50 text-center max-w-md mx-auto">
                 <p className="text-light mb-3">
                   Aww sorry hon, you need a subscription to keep chatting. Join me on my premium plan for unlimited conversations!
@@ -287,7 +289,7 @@ export default function ChatModal() {
                   onClick={() => {
                     closeModal();
                     setTimeout(() => {
-                      useModal().openModal('payment');
+                      openModal('payment');
                     }, 100);
                   }}
                 >
@@ -309,21 +311,21 @@ export default function ChatModal() {
           </div>
           
           {/* Input Area */}
-          <div className="p-4 md:p-6 border-t border-gray-800">
+          <div className="p-4 md:p-6 border-t border-gray-800 bg-dark-lighter">
             <div className="max-w-screen-lg mx-auto flex items-center">
               <input 
                 type="text" 
                 placeholder="Type a message..." 
-                className="flex-1 bg-dark-card text-light rounded-l-lg px-4 py-3 outline-none border border-gray-800 border-r-0"
+                className="flex-1 bg-dark-card text-white rounded-l-lg px-4 py-3 outline-none border border-gray-700 border-r-0 caret-white placeholder-gray-400"
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyDown={handleKeyDown}
-                disabled={isLoading || (!isPaid && user && user.messageCount >= 1)}
+                disabled={isLoading || (!isPaid && user && user.messageCount ? user.messageCount >= 1 : false)}
               />
               <button 
                 className={`${isLoading ? 'bg-primary-dark' : 'bg-primary hover:bg-primary-dark'} text-white p-3 rounded-r-lg transition`}
                 onClick={handleSendMessage}
-                disabled={isLoading || (!isPaid && user && user.messageCount >= 1)}
+                disabled={isLoading || (!isPaid && user && user.messageCount ? user.messageCount >= 1 : false)}
                 aria-label="Send message"
               >
                 <i className="ri-send-plane-fill text-xl"></i>
