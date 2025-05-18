@@ -258,11 +258,11 @@ export default function AdminPanel() {
         <h1 className="text-2xl font-display font-semibold mb-6">Admin Panel</h1>
         
         <Tabs defaultValue="ai-settings">
-          <TabsList className="mb-6">
-            <TabsTrigger value="ai-settings">AI Settings</TabsTrigger>
-            <TabsTrigger value="content">Content Management</TabsTrigger>
-            <TabsTrigger value="payment">Payment Settings</TabsTrigger>
-            <TabsTrigger value="automation">Automation</TabsTrigger>
+          <TabsList className="mb-6 w-full flex flex-wrap gap-1">
+            <TabsTrigger className="flex-1" value="ai-settings">AI Settings</TabsTrigger>
+            <TabsTrigger className="flex-1" value="content">Content Management</TabsTrigger>
+            <TabsTrigger className="flex-1" value="payment">Payment Settings</TabsTrigger>
+            <TabsTrigger className="flex-1" value="automation">Automation</TabsTrigger>
           </TabsList>
           
           {/* AI Settings Tab */}
@@ -273,11 +273,11 @@ export default function AdminPanel() {
                 <CardDescription>Configure AI model behavior and parameters for chat and voice features.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="ai-model">AI Model</Label>
                     <Select value={aiModel} onValueChange={setAiModel}>
-                      <SelectTrigger id="ai-model">
+                      <SelectTrigger id="ai-model" className="w-full">
                         <SelectValue placeholder="Select AI model" />
                       </SelectTrigger>
                       <SelectContent>
@@ -291,7 +291,7 @@ export default function AdminPanel() {
                   <div className="space-y-2">
                     <Label htmlFor="voice-tone">Voice Tone</Label>
                     <Select value={voiceTone} onValueChange={setVoiceTone}>
-                      <SelectTrigger id="voice-tone">
+                      <SelectTrigger id="voice-tone" className="w-full">
                         <SelectValue placeholder="Select voice tone" />
                       </SelectTrigger>
                       <SelectContent>
@@ -306,7 +306,7 @@ export default function AdminPanel() {
                   <div className="space-y-2">
                     <Label htmlFor="voice-accent">Voice Accent</Label>
                     <Select value={voiceAccent} onValueChange={setVoiceAccent}>
-                      <SelectTrigger id="voice-accent">
+                      <SelectTrigger id="voice-accent" className="w-full">
                         <SelectValue placeholder="Select voice accent" />
                       </SelectTrigger>
                       <SelectContent>
@@ -326,6 +326,7 @@ export default function AdminPanel() {
                       min="1"
                       value={freeMessageLimit}
                       onChange={(e) => setFreeMessageLimit(parseInt(e.target.value))}
+                      className="w-full"
                     />
                   </div>
                   
@@ -337,6 +338,7 @@ export default function AdminPanel() {
                       min="1"
                       value={telegramMessageLimit}
                       onChange={(e) => setTelegramMessageLimit(parseInt(e.target.value))}
+                      className="w-full"
                     />
                   </div>
                 </div>
@@ -367,12 +369,12 @@ export default function AdminPanel() {
           <TabsContent value="content">
             <div className="grid grid-cols-1 gap-6">
               {/* Create Post */}
-              <Card>
-                <CardHeader>
+              <Card className="overflow-hidden">
+                <CardHeader className="px-4 sm:px-6">
                   <CardTitle>Create New Post</CardTitle>
                   <CardDescription>Add a new post to Sophia's timeline</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-4 px-4 sm:px-6">
                   <div className="space-y-2">
                     <Label htmlFor="post-title">Title</Label>
                     <Input
@@ -380,6 +382,7 @@ export default function AdminPanel() {
                       placeholder="Post title"
                       value={postTitle}
                       onChange={(e) => setPostTitle(e.target.value)}
+                      className="w-full"
                     />
                   </div>
                   
@@ -391,6 +394,7 @@ export default function AdminPanel() {
                       value={postContent}
                       onChange={(e) => setPostContent(e.target.value)}
                       rows={3}
+                      className="w-full"
                     />
                   </div>
                   
@@ -401,6 +405,7 @@ export default function AdminPanel() {
                       placeholder="Image URL"
                       value={postImageUrl}
                       onChange={(e) => setPostImageUrl(e.target.value)}
+                      className="w-full"
                     />
                   </div>
                   
@@ -416,6 +421,7 @@ export default function AdminPanel() {
                   <Button 
                     onClick={handleCreatePost}
                     disabled={createPostMutation.isPending}
+                    className="w-full sm:w-auto"
                   >
                     {createPostMutation.isPending ? "Creating..." : "Create Post"}
                   </Button>
@@ -423,12 +429,12 @@ export default function AdminPanel() {
               </Card>
               
               {/* Create Photo */}
-              <Card>
-                <CardHeader>
+              <Card className="overflow-hidden">
+                <CardHeader className="px-4 sm:px-6">
                   <CardTitle>Add New Photo</CardTitle>
                   <CardDescription>Add a new photo to Sophia's gallery</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-4 px-4 sm:px-6">
                   <div className="space-y-2">
                     <Label htmlFor="photo-title">Title</Label>
                     <Input
@@ -436,6 +442,7 @@ export default function AdminPanel() {
                       placeholder="Photo title"
                       value={photoTitle}
                       onChange={(e) => setPhotoTitle(e.target.value)}
+                      className="w-full"
                     />
                   </div>
                   
@@ -447,6 +454,7 @@ export default function AdminPanel() {
                       value={photoDescription}
                       onChange={(e) => setPhotoDescription(e.target.value)}
                       rows={2}
+                      className="w-full"
                     />
                   </div>
                   
@@ -457,6 +465,7 @@ export default function AdminPanel() {
                       placeholder="Image URL"
                       value={photoImageUrl}
                       onChange={(e) => setPhotoImageUrl(e.target.value)}
+                      className="w-full"
                     />
                   </div>
                   
@@ -472,6 +481,7 @@ export default function AdminPanel() {
                   <Button 
                     onClick={handleCreatePhoto}
                     disabled={createPhotoMutation.isPending}
+                    className="w-full sm:w-auto"
                   >
                     {createPhotoMutation.isPending ? "Creating..." : "Add Photo"}
                   </Button>
@@ -479,12 +489,12 @@ export default function AdminPanel() {
               </Card>
               
               {/* Create Video */}
-              <Card>
-                <CardHeader>
+              <Card className="overflow-hidden">
+                <CardHeader className="px-4 sm:px-6">
                   <CardTitle>Add New Video</CardTitle>
                   <CardDescription>Add a new video to Sophia's collection</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-4 px-4 sm:px-6">
                   <div className="space-y-2">
                     <Label htmlFor="video-title">Title</Label>
                     <Input
@@ -492,6 +502,7 @@ export default function AdminPanel() {
                       placeholder="Video title"
                       value={videoTitle}
                       onChange={(e) => setVideoTitle(e.target.value)}
+                      className="w-full"
                     />
                   </div>
                   
@@ -503,6 +514,7 @@ export default function AdminPanel() {
                       value={videoDescription}
                       onChange={(e) => setVideoDescription(e.target.value)}
                       rows={2}
+                      className="w-full"
                     />
                   </div>
                   
@@ -513,6 +525,7 @@ export default function AdminPanel() {
                       placeholder="Video URL"
                       value={videoUrl}
                       onChange={(e) => setVideoUrl(e.target.value)}
+                      className="w-full"
                     />
                   </div>
                   
@@ -523,6 +536,7 @@ export default function AdminPanel() {
                       placeholder="Thumbnail URL (optional)"
                       value={videoThumbnailUrl}
                       onChange={(e) => setVideoThumbnailUrl(e.target.value)}
+                      className="w-full"
                     />
                   </div>
                   
@@ -538,6 +552,7 @@ export default function AdminPanel() {
                   <Button 
                     onClick={handleCreateVideo}
                     disabled={createVideoMutation.isPending}
+                    className="w-full sm:w-auto"
                   >
                     {createVideoMutation.isPending ? "Creating..." : "Add Video"}
                   </Button>
