@@ -206,6 +206,15 @@ export default function PaymentModal() {
                 <i className="ri-lock-line mr-2"></i>
                 <span>Secure payment processed by PayPal</span>
               </div>
+              
+              {/* Cancel/Close button */}
+              <button 
+                type="button"
+                onClick={closeModal}
+                className="w-full mt-6 bg-dark-card hover:bg-dark-lighter text-light py-3 rounded-lg transition flex items-center justify-center"
+              >
+                Cancel
+              </button>
             </div>
           </form>
         </div>
