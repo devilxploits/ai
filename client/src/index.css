@@ -2,6 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Fix for input text being invisible */
+input[type="text"], 
+input[type="email"], 
+input[type="password"],
+textarea {
+  color: white !important;
+  caret-color: white !important;
+}
+
+::placeholder {
+  color: #a0a0a0 !important;
+  opacity: 0.7 !important;
+}
+
 /* Modal Styles */
 .modal-container {
   position: fixed;
