@@ -165,8 +165,8 @@ export default function ChatModal() {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/70 flex flex-col">
-      <div className="relative w-full bg-dark-lighter flex flex-col shadow-xl h-full overflow-hidden">
-        {/* Chat Header */}
+      <div className="fixed inset-0 z-50 bg-[#000000b0] flex flex-col">
+      {/* Chat Header */}
         <div className="p-4 border-b border-gray-800 flex justify-between items-center">
           <div className="flex items-center">
             <div className="w-10 h-10 rounded-full overflow-hidden mr-3">
