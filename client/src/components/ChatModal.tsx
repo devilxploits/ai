@@ -9,11 +9,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { useWebRTC } from "@/hooks/useWebRTC";
-import CustomChatInput from "./CustomChatInput";
 
 export default function ChatModal() {
   const { closeModal } = useModal();
-  const { user, isPaid, isAdmin } = useAuth();
+  const { user, isPaid } = useAuth();
   const { toast } = useToast();
   const [inputMessage, setInputMessage] = useState("");
   const chatMessagesRef = useRef<HTMLDivElement>(null);
@@ -118,8 +117,8 @@ export default function ChatModal() {
   };
 
   // Format message timestamp
-  const formatMessageTime = (timestamp: Date | null) => {
-    if (!timestamp) return "Just now";
+  const formatMessageTime = (timestamp: Date) => {
+    if (!timestamp) return "";
     try {
       const date = new Date(timestamp);
       const now = new Date();
@@ -140,11 +139,8 @@ export default function ChatModal() {
   // Use WebRTC hook for call functionality
   const { startCall, endCall, toggleMute, formattedDuration } = useWebRTC();
 
-  const { openModal } = useModal();
-  
   const handleStartCall = () => {
-    // Admin users can access all features regardless of payment status
-    if (!isPaid && !isAdmin && user) {
+    if (!isPaid && user) {
       toast({
         title: "Subscription Required",
         description: "Voice calls are available exclusively for premium subscribers!",
@@ -153,7 +149,7 @@ export default function ChatModal() {
       // Show upgrade prompt
       setTimeout(() => {
         closeModal();
-        openModal('payment');
+        useModal().openModal('payment');
       }, 100);
       return;
     }
@@ -171,7 +167,7 @@ export default function ChatModal() {
     <div className="fixed inset-0 z-50 bg-black/70 flex flex-col">
       <div className="fixed inset-0 z-50 bg-[#000000b0] flex flex-col">
       {/* Chat Header */}
-        <div className="p-4 border-b border-gray-800 flex justify-between items-center bg-dark-lighter">
+        <div className="p-4 border-b border-gray-800 flex justify-between items-center">
           <div className="flex items-center">
             <div className="w-10 h-10 rounded-full overflow-hidden mr-3">
               <img 
@@ -280,18 +276,18 @@ export default function ChatModal() {
               ))
             )}
             
-            {/* Subscription Prompt (For Free Users) - Hidden for admin users */}
-            {!isPaid && !isAdmin && user && (
-              <div className="bg-dark-card rounded-xl p-4 my-6 border border-primary border-opacity-50 text-center max-w-md mx-auto hidden">
+            {/* Subscription Prompt (For Free Users) */}
+            {!isPaid && user && user.messageCount >= 1 && (
+              <div className="bg-dark-card rounded-xl p-4 my-6 border border-primary border-opacity-50 text-center max-w-md mx-auto">
                 <p className="text-light mb-3">
-                  Join me on my premium plan for unlimited conversations!
+                  Aww sorry hon, you need a subscription to keep chatting. Join me on my premium plan for unlimited conversations!
                 </p>
                 <button 
                   className="bg-primary hover:bg-primary-dark text-white px-6 py-2 rounded-lg transition"
                   onClick={() => {
                     closeModal();
                     setTimeout(() => {
-                      openModal('payment');
+                      useModal().openModal('payment');
                     }, 100);
                   }}
                 >
@@ -312,26 +308,22 @@ export default function ChatModal() {
             )}
           </div>
           
-          {/* Login Message for Non-authenticated Users */}
-          {!user && (
-            <div className="bg-primary/20 border border-primary/40 rounded-lg p-3 mb-4 mx-4 md:mx-6 text-center">
-              <p className="text-white font-medium">Please login to chat with Sophia</p>
-            </div>
-          )}
-          
           {/* Input Area */}
-          <div className="p-4 md:p-6 border-t border-gray-800 bg-dark-lighter">
+          <div className="p-4 md:p-6 border-t border-gray-800">
             <div className="max-w-screen-lg mx-auto flex items-center">
-              <CustomChatInput
+              <input 
+                type="text" 
+                placeholder="Type a message..." 
+                className="flex-1 bg-dark-card text-light rounded-l-lg px-4 py-3 outline-none border border-gray-800 border-r-0"
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyDown={handleKeyDown}
-                disabled={isLoading || (!isPaid && !isAdmin && user ? false : false)}
+                disabled={isLoading || (!isPaid && user && user.messageCount >= 1)}
               />
               <button 
                 className={`${isLoading ? 'bg-primary-dark' : 'bg-primary hover:bg-primary-dark'} text-white p-3 rounded-r-lg transition`}
                 onClick={handleSendMessage}
-                disabled={isLoading || (!isPaid && !isAdmin && user ? false : false)}
+                disabled={isLoading || (!isPaid && user && user.messageCount >= 1)}
                 aria-label="Send message"
               >
                 <i className="ri-send-plane-fill text-xl"></i>
