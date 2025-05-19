@@ -2,13 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Fix for input text being invisible */
+/* Default input styling for login/register forms */
 input[type="text"], 
 input[type="email"], 
 input[type="password"],
 textarea {
   color: white !important;
   caret-color: white !important;
+}
+
+/* Exception for chat inputs - these should be black */
+.chat-black-text {
+  color: black !important;
+  caret-color: black !important;
 }
 
 ::placeholder {
