@@ -16,6 +16,7 @@ export default function LoginPage() {
   const [loginUsername, setLoginUsername] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [loginError, setLoginError] = useState("");
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
   
   // Register form state
   const [registerUsername, setRegisterUsername] = useState("");
@@ -23,6 +24,8 @@ export default function LoginPage() {
   const [registerPassword, setRegisterPassword] = useState("");
   const [registerConfirmPassword, setRegisterConfirmPassword] = useState("");
   const [registerError, setRegisterError] = useState("");
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+  const [showRegisterConfirmPassword, setShowRegisterConfirmPassword] = useState(false);
   
   // Handle login form submission
   const handleLogin = async (e: React.FormEvent) => {
@@ -118,13 +121,26 @@ export default function LoginPage() {
                           Forgot password?
                         </a>
                       </div>
-                      <Input 
-                        id="login-password" 
-                        type="password" 
-                        placeholder="Enter your password"
-                        value={loginPassword}
-                        onChange={(e) => setLoginPassword(e.target.value)}
-                      />
+                      <div className="relative">
+                        <Input 
+                          id="login-password" 
+                          type={showLoginPassword ? "text" : "password"}
+                          placeholder="Enter your password"
+                          value={loginPassword}
+                          onChange={(e) => setLoginPassword(e.target.value)}
+                        />
+                        <button
+                          type="button"
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white"
+                          onClick={() => setShowLoginPassword(!showLoginPassword)}
+                        >
+                          {showLoginPassword ? (
+                            <i className="ri-eye-off-line"></i>
+                          ) : (
+                            <i className="ri-eye-line"></i>
+                          )}
+                        </button>
+                      </div>
                     </div>
                     
                     {loginError && (
@@ -176,24 +192,50 @@ export default function LoginPage() {
                     
                     <div className="space-y-2">
                       <Label htmlFor="register-password">Password</Label>
-                      <Input 
-                        id="register-password" 
-                        type="password" 
-                        placeholder="Create a password"
-                        value={registerPassword}
-                        onChange={(e) => setRegisterPassword(e.target.value)}
-                      />
+                      <div className="relative">
+                        <Input 
+                          id="register-password" 
+                          type={showRegisterPassword ? "text" : "password"}
+                          placeholder="Create a password"
+                          value={registerPassword}
+                          onChange={(e) => setRegisterPassword(e.target.value)}
+                        />
+                        <button
+                          type="button"
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white"
+                          onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                        >
+                          {showRegisterPassword ? (
+                            <i className="ri-eye-off-line"></i>
+                          ) : (
+                            <i className="ri-eye-line"></i>
+                          )}
+                        </button>
+                      </div>
                     </div>
                     
                     <div className="space-y-2">
                       <Label htmlFor="register-confirm-password">Confirm Password</Label>
-                      <Input 
-                        id="register-confirm-password" 
-                        type="password" 
-                        placeholder="Confirm your password"
-                        value={registerConfirmPassword}
-                        onChange={(e) => setRegisterConfirmPassword(e.target.value)}
-                      />
+                      <div className="relative">
+                        <Input 
+                          id="register-confirm-password" 
+                          type={showRegisterConfirmPassword ? "text" : "password"}
+                          placeholder="Confirm your password"
+                          value={registerConfirmPassword}
+                          onChange={(e) => setRegisterConfirmPassword(e.target.value)}
+                        />
+                        <button
+                          type="button"
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white"
+                          onClick={() => setShowRegisterConfirmPassword(!showRegisterConfirmPassword)}
+                        >
+                          {showRegisterConfirmPassword ? (
+                            <i className="ri-eye-off-line"></i>
+                          ) : (
+                            <i className="ri-eye-line"></i>
+                          )}
+                        </button>
+                      </div>
                     </div>
                     
                     {registerError && (
