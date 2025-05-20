@@ -10,6 +10,8 @@ export const users = pgTable("users", {
   isAdmin: boolean("is_admin").default(false),
   isPaid: boolean("is_paid").default(false),
   subscriptionPlan: text("subscription_plan").default("free"),
+  subscriptionTier: text("subscription_tier").default("free"), // basic, premium, vip
+  subscriptionDuration: text("subscription_duration").default(""), // week, month, 6month, year
   subscriptionExpiry: timestamp("subscription_expiry"),
   paypalSubscriptionId: text("paypal_subscription_id"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -76,6 +78,19 @@ export const settings = pgTable("settings", {
   lastUpdated: timestamp("last_updated").defaultNow(),
 });
 
+// Subscription plans table to manage different tiers and durations
+export const subscriptionPlans = pgTable("subscription_plans", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),           // Display name (e.g. "Basic Monthly")
+  tier: text("tier").notNull(),           // basic, premium, vip
+  duration: text("duration").notNull(),   // week, month, 6month, year
+  price: integer("price").notNull(),      // Price in cents (e.g. 999 for $9.99)
+  featuresJson: json("features_json").$type<string[]>(), // Array of features as strings
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const calls = pgTable("calls", {
   id: serial("id").primaryKey(),
   userId: integer("user_id"),
@@ -135,6 +150,12 @@ export const insertCallSchema = createInsertSchema(calls).pick({
   duration: true,
 });
 
+export const insertSubscriptionPlanSchema = createInsertSchema(subscriptionPlans).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
@@ -143,6 +164,7 @@ export type InsertPhoto = z.infer<typeof insertPhotoSchema>;
 export type InsertVideo = z.infer<typeof insertVideoSchema>;
 export type InsertSettings = z.infer<typeof insertSettingsSchema>;
 export type InsertCall = z.infer<typeof insertCallSchema>;
+export type InsertSubscriptionPlan = z.infer<typeof insertSubscriptionPlanSchema>;
 
 export type User = typeof users.$inferSelect;
 export type Message = typeof messages.$inferSelect;
@@ -151,3 +173,4 @@ export type Photo = typeof photos.$inferSelect;
 export type Video = typeof videos.$inferSelect;
 export type Settings = typeof settings.$inferSelect;
 export type Call = typeof calls.$inferSelect;
+export type SubscriptionPlan = typeof subscriptionPlans.$inferSelect;
