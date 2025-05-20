@@ -143,3 +143,48 @@ export async function speechToText(audioData: string): Promise<{ transcription: 
   const res = await apiRequest('POST', '/api/stt', { audioData });
   return res.json();
 }
+
+// Subscription Plans API
+export async function getSubscriptionPlans(activeOnly = true): Promise<any[]> {
+  const query = activeOnly ? '?active=true' : '';
+  const res = await apiRequest('GET', `/api/subscription-plans${query}`);
+  return res.json();
+}
+
+export async function getSubscriptionPlan(id: number): Promise<any> {
+  const res = await apiRequest('GET', `/api/subscription-plans/${id}`);
+  return res.json();
+}
+
+export async function createSubscriptionPlan(data: {
+  name: string;
+  tier: string;
+  duration: string;
+  price: number;
+  featuresJson: string[];
+  isActive?: boolean;
+}): Promise<any> {
+  const res = await apiRequest('POST', '/api/subscription-plans', data);
+  return res.json();
+}
+
+export async function updateSubscriptionPlan(id: number, data: Partial<{
+  name: string;
+  tier: string;
+  duration: string;
+  price: number;
+  featuresJson: string[];
+  isActive: boolean;
+}>): Promise<any> {
+  const res = await apiRequest('PATCH', `/api/subscription-plans/${id}`, data);
+  return res.json();
+}
+
+export async function deleteSubscriptionPlan(id: number): Promise<void> {
+  await apiRequest('DELETE', `/api/subscription-plans/${id}`);
+}
+
+export async function subscribe(planId: number, paypalSubscriptionId?: string): Promise<User> {
+  const res = await apiRequest('POST', '/api/subscribe', { planId, paypalSubscriptionId });
+  return res.json();
+}
