@@ -1,8 +1,8 @@
 import {
-  users, messages, posts, photos, videos, settings, calls,
-  type User, type Message, type Post, type Photo, type Video, type Settings, type Call,
+  users, messages, posts, photos, videos, settings, calls, subscriptionPlans,
+  type User, type Message, type Post, type Photo, type Video, type Settings, type Call, type SubscriptionPlan,
   type InsertUser, type InsertMessage, type InsertPost, type InsertPhoto, type InsertVideo, 
-  type InsertSettings, type InsertCall
+  type InsertSettings, type InsertCall, type InsertSubscriptionPlan
 } from "@shared/schema";
 
 export interface IStorage {
@@ -47,6 +47,16 @@ export interface IStorage {
   getCalls(userId: number): Promise<Call[]>;
   createCall(call: InsertCall): Promise<Call>;
   updateCall(id: number, duration: number): Promise<Call | undefined>;
+  
+  // Subscription Plan methods
+  getSubscriptionPlans(isActive?: boolean): Promise<SubscriptionPlan[]>;
+  getSubscriptionPlan(id: number): Promise<SubscriptionPlan | undefined>;
+  createSubscriptionPlan(plan: InsertSubscriptionPlan): Promise<SubscriptionPlan>;
+  updateSubscriptionPlan(id: number, data: Partial<SubscriptionPlan>): Promise<SubscriptionPlan | undefined>;
+  deleteSubscriptionPlan(id: number): Promise<boolean>;
+  
+  // User Subscription methods
+  updateUserSubscription(userId: number, planId: number, paypalSubscriptionId?: string): Promise<User | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -57,6 +67,7 @@ export class MemStorage implements IStorage {
   private videos: Map<number, Video>;
   private settings: Settings | undefined;
   private calls: Map<number, Call>;
+  private subscriptionPlans: Map<number, SubscriptionPlan>;
   
   private userAutoInc: number;
   private messageAutoInc: number;
@@ -64,6 +75,7 @@ export class MemStorage implements IStorage {
   private photoAutoInc: number;
   private videoAutoInc: number;
   private callAutoInc: number;
+  private subscriptionPlanAutoInc: number;
   
   constructor() {
     this.users = new Map();
@@ -72,6 +84,7 @@ export class MemStorage implements IStorage {
     this.photos = new Map();
     this.videos = new Map();
     this.calls = new Map();
+    this.subscriptionPlans = new Map();
     
     this.userAutoInc = 1;
     this.messageAutoInc = 1;
@@ -79,6 +92,7 @@ export class MemStorage implements IStorage {
     this.photoAutoInc = 1;
     this.videoAutoInc = 1;
     this.callAutoInc = 1;
+    this.subscriptionPlanAutoInc = 1;
     
     // Initialize with admin user
     this.createUser({
@@ -109,6 +123,187 @@ export class MemStorage implements IStorage {
     
     // Add seed data
     this.seedData();
+    
+    // Initialize default subscription plans
+    this.seedSubscriptionPlans();
+  }
+  
+  private seedSubscriptionPlans() {
+    // Define default subscription plans
+    const plansSeed = [
+      // Weekly plans
+      {
+        name: "Basic Weekly",
+        tier: "basic",
+        duration: "week",
+        price: 499, // $4.99
+        featuresJson: [
+          "50 daily chat messages",
+          "Access to public photos",
+          "Basic profile access"
+        ],
+        isActive: true
+      },
+      {
+        name: "Premium Weekly",
+        tier: "premium",
+        duration: "week",
+        price: 999, // $9.99
+        featuresJson: [
+          "Unlimited chat messages",
+          "Access to all photos",
+          "Voice calls (10 minutes/day)",
+          "Premium content"
+        ],
+        isActive: true
+      },
+      {
+        name: "VIP Weekly",
+        tier: "vip",
+        duration: "week",
+        price: 1999, // $19.99
+        featuresJson: [
+          "All Premium features",
+          "Unlimited voice calls",
+          "Priority responses",
+          "Custom photo requests",
+          "Early access to new content"
+        ],
+        isActive: true
+      },
+      
+      // Monthly plans
+      {
+        name: "Basic Monthly",
+        tier: "basic",
+        duration: "month",
+        price: 999, // $9.99
+        featuresJson: [
+          "50 daily chat messages",
+          "Access to public photos",
+          "Basic profile access"
+        ],
+        isActive: true
+      },
+      {
+        name: "Premium Monthly",
+        tier: "premium",
+        duration: "month",
+        price: 1999, // $19.99
+        featuresJson: [
+          "Unlimited chat messages",
+          "Access to all photos",
+          "Voice calls (15 minutes/day)",
+          "Premium content"
+        ],
+        isActive: true
+      },
+      {
+        name: "VIP Monthly",
+        tier: "vip",
+        duration: "month",
+        price: 3999, // $39.99
+        featuresJson: [
+          "All Premium features",
+          "Unlimited voice calls",
+          "Priority responses",
+          "Custom photo requests",
+          "Early access to new content"
+        ],
+        isActive: true
+      },
+      
+      // 6-month plans
+      {
+        name: "Basic 6-Month",
+        tier: "basic",
+        duration: "6month",
+        price: 4999, // $49.99
+        featuresJson: [
+          "50 daily chat messages",
+          "Access to public photos",
+          "Basic profile access"
+        ],
+        isActive: true
+      },
+      {
+        name: "Premium 6-Month",
+        tier: "premium",
+        duration: "6month",
+        price: 9999, // $99.99
+        featuresJson: [
+          "Unlimited chat messages",
+          "Access to all photos",
+          "Voice calls (20 minutes/day)",
+          "Premium content",
+          "Exclusive seasonal events"
+        ],
+        isActive: true
+      },
+      {
+        name: "VIP 6-Month",
+        tier: "vip",
+        duration: "6month",
+        price: 19999, // $199.99
+        featuresJson: [
+          "All Premium features",
+          "Unlimited voice calls",
+          "Priority responses",
+          "Custom photo requests",
+          "Early access to new content",
+          "Personalized AI experience"
+        ],
+        isActive: true
+      },
+      
+      // Annual plans
+      {
+        name: "Basic Annual",
+        tier: "basic",
+        duration: "year",
+        price: 8999, // $89.99
+        featuresJson: [
+          "50 daily chat messages",
+          "Access to public photos",
+          "Basic profile access"
+        ],
+        isActive: true
+      },
+      {
+        name: "Premium Annual",
+        tier: "premium",
+        duration: "year",
+        price: 17999, // $179.99
+        featuresJson: [
+          "Unlimited chat messages",
+          "Access to all photos",
+          "Voice calls (30 minutes/day)",
+          "Premium content",
+          "Exclusive seasonal events",
+          "Annual gift"
+        ],
+        isActive: true
+      },
+      {
+        name: "VIP Annual",
+        tier: "vip",
+        duration: "year",
+        price: 35999, // $359.99
+        featuresJson: [
+          "All Premium features",
+          "Unlimited voice calls",
+          "Priority responses",
+          "Custom photo requests",
+          "Early access to new content",
+          "Personalized AI experience",
+          "VIP exclusive events",
+          "Annual premium gift"
+        ],
+        isActive: true
+      }
+    ];
+    
+    plansSeed.forEach(plan => this.createSubscriptionPlan(plan));
   }
   
   private seedData() {
@@ -433,6 +628,87 @@ export class MemStorage implements IStorage {
     const updatedCall = { ...call, duration };
     this.calls.set(id, updatedCall);
     return updatedCall;
+  }
+  
+  // Subscription Plan methods
+  async getSubscriptionPlans(isActive?: boolean): Promise<SubscriptionPlan[]> {
+    return Array.from(this.subscriptionPlans.values())
+      .filter(plan => isActive === undefined || plan.isActive === isActive)
+      .sort((a, b) => a.price - b.price);
+  }
+  
+  async getSubscriptionPlan(id: number): Promise<SubscriptionPlan | undefined> {
+    return this.subscriptionPlans.get(id);
+  }
+  
+  async createSubscriptionPlan(insertPlan: InsertSubscriptionPlan): Promise<SubscriptionPlan> {
+    const id = this.subscriptionPlanAutoInc++;
+    const now = new Date();
+    const plan: SubscriptionPlan = {
+      ...insertPlan,
+      id,
+      createdAt: now,
+      updatedAt: now
+    };
+    
+    this.subscriptionPlans.set(id, plan);
+    return plan;
+  }
+  
+  async updateSubscriptionPlan(id: number, data: Partial<SubscriptionPlan>): Promise<SubscriptionPlan | undefined> {
+    const plan = this.subscriptionPlans.get(id);
+    if (!plan) return undefined;
+    
+    const updatedPlan = { ...plan, ...data, updatedAt: new Date() };
+    this.subscriptionPlans.set(id, updatedPlan);
+    return updatedPlan;
+  }
+  
+  async deleteSubscriptionPlan(id: number): Promise<boolean> {
+    return this.subscriptionPlans.delete(id);
+  }
+  
+  // User Subscription methods
+  async updateUserSubscription(userId: number, planId: number, paypalSubscriptionId?: string): Promise<User | undefined> {
+    const user = await this.getUser(userId);
+    if (!user) return undefined;
+    
+    const plan = await this.getSubscriptionPlan(planId);
+    if (!plan) return undefined;
+    
+    // Calculate subscription expiry date based on plan duration
+    const now = new Date();
+    let expiryDate = new Date(now);
+    
+    switch (plan.duration) {
+      case 'week':
+        expiryDate.setDate(now.getDate() + 7);
+        break;
+      case 'month':
+        expiryDate.setMonth(now.getMonth() + 1);
+        break;
+      case '6month':
+        expiryDate.setMonth(now.getMonth() + 6);
+        break;
+      case 'year':
+        expiryDate.setFullYear(now.getFullYear() + 1);
+        break;
+      default:
+        // Default to 30 days if duration is not recognized
+        expiryDate.setDate(now.getDate() + 30);
+    }
+    
+    // Update user with subscription details
+    const updatedUser = await this.updateUser(userId, {
+      isPaid: true,
+      subscriptionPlan: plan.tier,
+      subscriptionTier: plan.tier,
+      subscriptionDuration: plan.duration,
+      subscriptionExpiry: expiryDate,
+      paypalSubscriptionId: paypalSubscriptionId || null
+    });
+    
+    return updatedUser;
   }
 }
 

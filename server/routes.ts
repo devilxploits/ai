@@ -11,7 +11,7 @@ import { speechToText } from "./whisper";
 import { 
   insertUserSchema, insertMessageSchema, insertPostSchema, 
   insertPhotoSchema, insertVideoSchema, insertSettingsSchema,
-  insertCallSchema
+  insertCallSchema, insertSubscriptionPlanSchema
 } from "@shared/schema";
 
 declare module "express-session" {
@@ -529,6 +529,104 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Video deleted successfully" });
     } catch (error) {
       res.status(500).json({ message: "Error deleting video" });
+    }
+  });
+  
+  // Subscription Plan routes
+  app.get("/api/subscription-plans", async (req, res) => {
+    try {
+      const isActive = req.query.active === 'true';
+      const plans = await storage.getSubscriptionPlans(isActive);
+      res.json(plans);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching subscription plans" });
+    }
+  });
+  
+  app.get("/api/subscription-plans/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const plan = await storage.getSubscriptionPlan(id);
+      
+      if (!plan) {
+        return res.status(404).json({ message: "Subscription plan not found" });
+      }
+      
+      res.json(plan);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching subscription plan" });
+    }
+  });
+  
+  app.post("/api/subscription-plans", requireAdmin, async (req, res) => {
+    try {
+      const validatedData = insertSubscriptionPlanSchema.parse(req.body);
+      const plan = await storage.createSubscriptionPlan(validatedData);
+      res.status(201).json(plan);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: error.errors });
+      }
+      res.status(500).json({ message: "Error creating subscription plan" });
+    }
+  });
+  
+  app.patch("/api/subscription-plans/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const plan = await storage.updateSubscriptionPlan(id, req.body);
+      
+      if (!plan) {
+        return res.status(404).json({ message: "Subscription plan not found" });
+      }
+      
+      res.json(plan);
+    } catch (error) {
+      res.status(500).json({ message: "Error updating subscription plan" });
+    }
+  });
+  
+  app.delete("/api/subscription-plans/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteSubscriptionPlan(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Subscription plan not found" });
+      }
+      
+      res.json({ message: "Subscription plan deleted successfully" });
+    }
+    catch (error) {
+      res.status(500).json({ message: "Error deleting subscription plan" });
+    }
+  });
+  
+  // User Subscription Management
+  app.post("/api/subscribe", requireAuth, async (req, res) => {
+    try {
+      const { planId, paypalSubscriptionId } = req.body;
+      
+      if (!planId) {
+        return res.status(400).json({ message: "Plan ID is required" });
+      }
+      
+      const user = await storage.updateUserSubscription(
+        req.session.userId!,
+        parseInt(planId),
+        paypalSubscriptionId
+      );
+      
+      if (!user) {
+        return res.status(404).json({ message: "User or subscription plan not found" });
+      }
+      
+      // Remove password from response
+      const { password, ...userWithoutPassword } = user;
+      
+      res.json(userWithoutPassword);
+    } catch (error) {
+      res.status(500).json({ message: "Error processing subscription" });
     }
   });
   
