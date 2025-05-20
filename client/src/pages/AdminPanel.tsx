@@ -10,7 +10,11 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { getSettings, updateSettings, createPost, createPhoto, createVideo } from "@/lib/api";
+import { 
+  getSettings, updateSettings, createPost, createPhoto, createVideo,
+  getSubscriptionPlans, getSubscriptionPlan, createSubscriptionPlan, 
+  updateSubscriptionPlan, deleteSubscriptionPlan 
+} from "@/lib/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function AdminPanel() {
@@ -37,6 +41,21 @@ export default function AdminPanel() {
   const [autoPostEnabled, setAutoPostEnabled] = useState<boolean>(settings?.autoPostEnabled || false);
   const [autoPostTime, setAutoPostTime] = useState<string>(settings?.autoPostTime || "12:00");
   const [autoPostFrequency, setAutoPostFrequency] = useState<number>(settings?.autoPostFrequency || 1);
+  
+  // Subscription plans
+  const { data: subscriptionPlans = [] } = useQuery({
+    queryKey: ['/api/subscription-plans'],
+    queryFn: () => getSubscriptionPlans(false), // Get all plans, not just active ones
+  });
+  
+  // Subscription plan form state
+  const [planName, setPlanName] = useState<string>("");
+  const [planTier, setPlanTier] = useState<string>("basic");
+  const [planDuration, setPlanDuration] = useState<string>("month");
+  const [planPrice, setPlanPrice] = useState<number>(999);
+  const [planFeatures, setPlanFeatures] = useState<string>("");
+  const [planIsActive, setPlanIsActive] = useState<boolean>(true);
+  const [editingPlanId, setEditingPlanId] = useState<number | null>(null);
 
   // Content form state
   const [postTitle, setPostTitle] = useState<string>("");
@@ -235,6 +254,128 @@ export default function AdminPanel() {
     });
   };
 
+  // Subscription plan mutations
+  const createPlanMutation = useMutation({
+    mutationFn: (data: any) => createSubscriptionPlan(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/subscription-plans'] });
+      toast({
+        title: "Plan Created",
+        description: "Subscription plan has been created successfully."
+      });
+      resetPlanForm();
+    },
+    onError: (error) => {
+      toast({
+        title: "Create Failed",
+        description: error instanceof Error ? error.message : "Could not create subscription plan",
+        variant: "destructive"
+      });
+    }
+  });
+  
+  const updatePlanMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number, data: any }) => updateSubscriptionPlan(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/subscription-plans'] });
+      toast({
+        title: "Plan Updated",
+        description: "Subscription plan has been updated successfully."
+      });
+      resetPlanForm();
+    },
+    onError: (error) => {
+      toast({
+        title: "Update Failed",
+        description: error instanceof Error ? error.message : "Could not update subscription plan",
+        variant: "destructive"
+      });
+    }
+  });
+  
+  const deletePlanMutation = useMutation({
+    mutationFn: (id: number) => deleteSubscriptionPlan(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/subscription-plans'] });
+      toast({
+        title: "Plan Deleted",
+        description: "Subscription plan has been deleted successfully."
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Delete Failed",
+        description: error instanceof Error ? error.message : "Could not delete subscription plan",
+        variant: "destructive"
+      });
+    }
+  });
+  
+  // Helper functions for subscription plans
+  const handleCreateOrUpdatePlan = () => {
+    if (!planName || !planTier || !planDuration || planPrice <= 0 || !planFeatures) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Convert feature text to array
+    const featuresArray = planFeatures.split('\n')
+      .map(line => line.trim())
+      .filter(line => line.length > 0);
+      
+    const planData = {
+      name: planName,
+      tier: planTier,
+      duration: planDuration,
+      price: planPrice,
+      featuresJson: featuresArray,
+      isActive: planIsActive
+    };
+    
+    if (editingPlanId) {
+      updatePlanMutation.mutate({ id: editingPlanId, data: planData });
+    } else {
+      createPlanMutation.mutate(planData);
+    }
+  };
+  
+  const handleEditPlan = (plan: any) => {
+    setEditingPlanId(plan.id);
+    setPlanName(plan.name);
+    setPlanTier(plan.tier);
+    setPlanDuration(plan.duration);
+    setPlanPrice(plan.price);
+    
+    // Convert features array to string for textarea
+    if (plan.featuresJson && Array.isArray(plan.featuresJson)) {
+      setPlanFeatures(plan.featuresJson.join('\n'));
+    } else {
+      setPlanFeatures('');
+    }
+    
+    setPlanIsActive(plan.isActive);
+  };
+  
+  const handleDeletePlan = (id: number) => {
+    if (confirm("Are you sure you want to delete this subscription plan?")) {
+      deletePlanMutation.mutate(id);
+    }
+  };
+  
+  const resetPlanForm = () => {
+    setEditingPlanId(null);
+    setPlanName("");
+    setPlanTier("basic");
+    setPlanDuration("month");
+    setPlanPrice(999);
+    setPlanFeatures("");
+    setPlanIsActive(true);
+  };
+  
   // If not admin, show error
   if (!isAdmin) {
     return (
@@ -262,6 +403,7 @@ export default function AdminPanel() {
             <TabsTrigger className="flex-1" value="ai-settings">AI Settings</TabsTrigger>
             <TabsTrigger className="flex-1" value="content">Content Management</TabsTrigger>
             <TabsTrigger className="flex-1" value="payment">Payment Settings</TabsTrigger>
+            <TabsTrigger className="flex-1" value="subscriptions">Subscription Plans</TabsTrigger>
             <TabsTrigger className="flex-1" value="automation">Automation</TabsTrigger>
           </TabsList>
           
@@ -611,6 +753,184 @@ export default function AdminPanel() {
           </TabsContent>
           
           {/* Automation Tab */}
+          {/* Subscription Plans Tab */}
+          <TabsContent value="subscriptions">
+            <Card>
+              <CardHeader>
+                <CardTitle>Subscription Plans</CardTitle>
+                <CardDescription>Manage different subscription packages with various durations and privileges</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="mb-6">
+                    <h3 className="text-lg font-semibold mb-2">{editingPlanId ? "Edit Plan" : "Add New Plan"}</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="plan-name">Plan Name</Label>
+                        <Input
+                          id="plan-name"
+                          value={planName}
+                          onChange={(e) => setPlanName(e.target.value)}
+                          placeholder="e.g. Premium Monthly"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="plan-tier">Tier Level</Label>
+                        <Select value={planTier} onValueChange={setPlanTier}>
+                          <SelectTrigger id="plan-tier">
+                            <SelectValue placeholder="Select tier" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="basic">Basic</SelectItem>
+                            <SelectItem value="premium">Premium</SelectItem>
+                            <SelectItem value="vip">VIP</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="plan-duration">Duration</Label>
+                        <Select value={planDuration} onValueChange={setPlanDuration}>
+                          <SelectTrigger id="plan-duration">
+                            <SelectValue placeholder="Select duration" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="week">1 Week</SelectItem>
+                            <SelectItem value="month">1 Month</SelectItem>
+                            <SelectItem value="6month">6 Months</SelectItem>
+                            <SelectItem value="year">1 Year</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="plan-price">Price (in cents)</Label>
+                        <Input
+                          id="plan-price"
+                          type="number"
+                          min="0"
+                          value={planPrice}
+                          onChange={(e) => setPlanPrice(parseInt(e.target.value))}
+                          placeholder="e.g. 999 for $9.99"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor="plan-features">Features (one per line)</Label>
+                        <Textarea
+                          id="plan-features"
+                          rows={4}
+                          value={planFeatures}
+                          onChange={(e) => setPlanFeatures(e.target.value)}
+                          placeholder="e.g. Unlimited messages&#10;Premium content access&#10;Video chat support"
+                        />
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          id="plan-active"
+                          checked={planIsActive}
+                          onCheckedChange={setPlanIsActive}
+                        />
+                        <Label htmlFor="plan-active">Active</Label>
+                      </div>
+                    </div>
+                    
+                    <div className="flex space-x-2">
+                      <Button 
+                        onClick={handleCreateOrUpdatePlan} 
+                        disabled={createPlanMutation.isPending || updatePlanMutation.isPending}
+                      >
+                        {(createPlanMutation.isPending || updatePlanMutation.isPending) 
+                          ? "Saving..." 
+                          : editingPlanId ? "Update Plan" : "Create Plan"}
+                      </Button>
+                      
+                      {editingPlanId && (
+                        <Button variant="outline" onClick={resetPlanForm}>
+                          Cancel
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Available Plans</h3>
+                    <div className="bg-white bg-opacity-5 rounded-lg overflow-hidden">
+                      {subscriptionPlans.length === 0 ? (
+                        <div className="p-4 text-center text-light-dimmed">
+                          No subscription plans found. Create one to get started.
+                        </div>
+                      ) : (
+                        <div className="overflow-x-auto">
+                          <table className="w-full">
+                            <thead>
+                              <tr className="border-b border-white border-opacity-10">
+                                <th className="p-3 text-left">Name</th>
+                                <th className="p-3 text-left">Tier</th>
+                                <th className="p-3 text-left">Duration</th>
+                                <th className="p-3 text-left">Price</th>
+                                <th className="p-3 text-left">Status</th>
+                                <th className="p-3 text-left">Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {subscriptionPlans.map((plan: any) => (
+                                <tr 
+                                  key={plan.id} 
+                                  className="border-b border-white border-opacity-10 hover:bg-white hover:bg-opacity-5"
+                                >
+                                  <td className="p-3">{plan.name}</td>
+                                  <td className="p-3 capitalize">{plan.tier}</td>
+                                  <td className="p-3">{
+                                    plan.duration === 'week' ? '1 Week' :
+                                    plan.duration === 'month' ? '1 Month' :
+                                    plan.duration === '6month' ? '6 Months' :
+                                    plan.duration === 'year' ? '1 Year' : plan.duration
+                                  }</td>
+                                  <td className="p-3">${(plan.price / 100).toFixed(2)}</td>
+                                  <td className="p-3">
+                                    <span className={`inline-flex items-center px-2 py-1 rounded text-xs ${
+                                      plan.isActive 
+                                        ? 'bg-green-500 bg-opacity-20 text-green-400' 
+                                        : 'bg-red-500 bg-opacity-20 text-red-400'
+                                    }`}>
+                                      {plan.isActive ? 'Active' : 'Inactive'}
+                                    </span>
+                                  </td>
+                                  <td className="p-3">
+                                    <div className="flex space-x-2">
+                                      <Button 
+                                        variant="outline" 
+                                        size="sm" 
+                                        onClick={() => handleEditPlan(plan)}
+                                      >
+                                        Edit
+                                      </Button>
+                                      <Button 
+                                        variant="destructive" 
+                                        size="sm" 
+                                        onClick={() => handleDeletePlan(plan.id)}
+                                        disabled={deletePlanMutation.isPending}
+                                      >
+                                        Delete
+                                      </Button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="automation">
             <Card>
               <CardHeader>
