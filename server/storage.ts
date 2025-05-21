@@ -123,9 +123,6 @@ export class MemStorage implements IStorage {
     
     // Add seed data
     this.seedData();
-    
-    // Initialize default subscription plans
-    this.seedSubscriptionPlans();
   }
   
   private seedSubscriptionPlans() {
@@ -651,6 +648,7 @@ export class MemStorage implements IStorage {
       updatedAt: now
     };
     
+    console.log(`Creating subscription plan: ${plan.name}, id: ${plan.id}`);
     this.subscriptionPlans.set(id, plan);
     return plan;
   }
