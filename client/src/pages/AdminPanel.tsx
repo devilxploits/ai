@@ -45,7 +45,7 @@ export default function AdminPanel() {
   // Subscription plans
   const { data: subscriptionPlans = [] } = useQuery({
     queryKey: ['/api/subscription-plans'],
-    queryFn: () => getSubscriptionPlans(false), // Get all plans, not just active ones
+    queryFn: () => getSubscriptionPlans(true), // Use active=true to match how plans are fetched on homepage
   });
   
   // Subscription plan form state
