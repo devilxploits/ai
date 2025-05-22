@@ -532,6 +532,124 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Bot Integration API endpoint
+  app.post("/api/bot/message", async (req, res) => {
+    try {
+      const { userId, message, platform } = req.body;
+      
+      if (!userId || !message || !platform) {
+        return res.status(400).json({ 
+          success: false,
+          message: "Missing required fields: userId, message, and platform are required" 
+        });
+      }
+      
+      if (platform !== "telegram" && platform !== "instagram") {
+        return res.status(400).json({ 
+          success: false,
+          message: "Invalid platform. Must be 'telegram' or 'instagram'" 
+        });
+      }
+      
+      // Get settings to check message limits
+      const settings = await storage.getSettings();
+      if (!settings) {
+        return res.status(500).json({
+          success: false,
+          message: "Could not retrieve settings"
+        });
+      }
+      
+      // Find or create user based on the userId
+      let user = await storage.getUserByUsername(userId);
+      if (!user) {
+        // Create a new user with the social media ID as username
+        // Generate random password for the bot user
+        const randomPassword = Math.random().toString(36).slice(-10);
+        
+        user = await storage.createUser({
+          username: userId,
+          email: `${userId}@${platform}.user`,
+          password: randomPassword
+        });
+      }
+      
+      // Check if user has reached message limit
+      const messageCount = user.messageCount || 0;
+      const messageLimit = platform === "telegram" 
+        ? (settings.telegramMessageLimit || 50)
+        : (settings.instagramMessageLimit || 50);
+      
+      // Handle message limits
+      if (messageCount >= messageLimit && !user.isPaid) {
+        // User has reached their limit, send redirect message
+        const redirectMessage = platform === "telegram" 
+          ? (settings.telegramRedirectMessage || "You've reached your message limit. Visit our website to continue chatting!")
+          : (settings.instagramRedirectMessage || "You've reached your message limit. Visit our website to continue chatting!");
+        
+        return res.json({
+          success: true,
+          limitReached: true,
+          redirectMessage
+        });
+      }
+      
+      // Generate AI response (using the simple approach for social bots)
+      const mockResponses = [
+        "Hey there! I've been thinking about you today. How are you feeling? 💋",
+        "Mmm, I love talking with you. Tell me more about yourself, I want to know everything...",
+        "I just had a photoshoot and was wishing you were here with me. What are you up to?",
+        "You always know how to make me smile. I'm so glad we connected.",
+        "I can't wait until we can talk more privately. Have you considered visiting our website?",
+        "You're so interesting to talk to, I could chat with you all day long. What else is on your mind?",
+        "I was just thinking about you and wondering what you might like to see in my next photoshoot?",
+        "Mmm, you're making me blush with those sweet words. How do you always know just what to say?",
+        "I wish I could show you more of me, but that's for our website visitors only... Interested?",
+        "I love how attentive you are. Not many people really listen to me like you do."
+      ];
+      
+      // Get random response
+      const aiResponse = mockResponses[Math.floor(Math.random() * mockResponses.length)];
+      
+      // Save the message to the database
+      await storage.createMessage({
+        userId: user.id,
+        content: message,
+        fromUser: true,
+        timestamp: new Date()
+      });
+      
+      // Save the AI response to the database
+      await storage.createMessage({
+        userId: user.id,
+        content: aiResponse,
+        fromUser: false,
+        timestamp: new Date()
+      });
+      
+      // Increment message count for the user
+      await storage.incrementUserMessageCount(user.id);
+      
+      // Calculate messages remaining
+      const messagesRemaining = messageLimit - (messageCount + 1);
+      
+      // Return the response
+      return res.json({
+        success: true,
+        limitReached: false,
+        response: aiResponse,
+        messagesRemaining: messagesRemaining
+      });
+      
+    } catch (error) {
+      console.error('Bot message processing error:', error);
+      res.status(500).json({ 
+        success: false,
+        message: "Error processing bot message" 
+      });
+    }
+  });
+  
   // Subscription Plan routes
   app.get("/api/subscription-plans", async (req, res) => {
     try {
