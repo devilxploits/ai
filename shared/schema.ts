@@ -9,11 +9,26 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   isAdmin: boolean("is_admin").default(false),
   isPaid: boolean("is_paid").default(false),
+  
+  // Social media identifiers
+  telegramId: text("telegram_id"),
+  telegramUsername: text("telegram_username"),
+  telegramMessageCount: integer("telegram_message_count").default(0),
+  telegramLastInteraction: timestamp("telegram_last_interaction"),
+  
+  instagramId: text("instagram_id"),
+  instagramUsername: text("instagram_username"),
+  instagramMessageCount: integer("instagram_message_count").default(0),
+  instagramLastInteraction: timestamp("instagram_last_interaction"),
+  
+  // Subscription information
   subscriptionPlan: text("subscription_plan").default("free"),
   subscriptionTier: text("subscription_tier").default("free"), // basic, premium, vip
   subscriptionDuration: text("subscription_duration").default(""), // week, month, 6month, year
   subscriptionExpiry: timestamp("subscription_expiry"),
   paypalSubscriptionId: text("paypal_subscription_id"),
+  
+  // User activity
   createdAt: timestamp("created_at").defaultNow(),
   lastLogin: timestamp("last_login"),
   messageCount: integer("message_count").default(0),
@@ -68,13 +83,32 @@ export const settings = pgTable("settings", {
   voiceAccent: text("voice_accent").default("american"),
   imagePrompt: text("image_prompt").default("full body ultra realistic photo of seductive blonde woman soft skin natural curves beautiful eyes same face each time"),
   freeMessageLimit: integer("free_message_limit").default(1),
+  
+  // Telegram Settings
+  telegramApiKey: text("telegram_api_key"),
+  telegramBotUsername: text("telegram_bot_username"),
+  telegramChannelId: text("telegram_channel_id"),
   telegramMessageLimit: integer("telegram_message_limit").default(50),
+  telegramRedirectMessage: text("telegram_redirect_message").default("You've reached your message limit. Visit our website to continue chatting!"),
+  telegramWebhookUrl: text("telegram_webhook_url"),
+
+  // Instagram Settings
+  instagramUsername: text("instagram_username"),
+  instagramPassword: text("instagram_password"),
+  instagramApiKey: text("instagram_api_key"),
+  instagramMessageLimit: integer("instagram_message_limit").default(50),
+  instagramRedirectMessage: text("instagram_redirect_message").default("You've reached your message limit. Visit our website to continue chatting!"),
+  
+  // Payment Settings
   paypalClientId: text("paypal_client_id"),
   paypalSecret: text("paypal_secret"),
   paypalWebhook: text("paypal_webhook"),
+  
+  // Automation Settings
   autoPostEnabled: boolean("auto_post_enabled").default(false),
   autoPostTime: text("auto_post_time").default("12:00"),
   autoPostFrequency: integer("auto_post_frequency").default(1),
+  
   lastUpdated: timestamp("last_updated").defaultNow(),
 });
 
