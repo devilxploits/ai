@@ -35,6 +35,9 @@ export default function AdminPanel() {
   const [imagePrompt, setImagePrompt] = useState<string>(settings?.imagePrompt || "");
   const [freeMessageLimit, setFreeMessageLimit] = useState<number>(settings?.freeMessageLimit || 1);
   const [telegramMessageLimit, setTelegramMessageLimit] = useState<number>(settings?.telegramMessageLimit || 50);
+  const [instagramMessageLimit, setInstagramMessageLimit] = useState<number>(settings?.instagramMessageLimit || 50);
+  const [telegramRedirectMessage, setTelegramRedirectMessage] = useState<string>(settings?.telegramRedirectMessage || "You've reached your message limit. Visit our website to continue chatting!");
+  const [instagramRedirectMessage, setInstagramRedirectMessage] = useState<string>(settings?.instagramRedirectMessage || "You've reached your message limit. Visit our website to continue chatting!");
   const [paypalClientId, setPaypalClientId] = useState<string>(settings?.paypalClientId || "");
   const [paypalSecret, setPaypalSecret] = useState<string>(settings?.paypalSecret || "");
   const [paypalWebhook, setPaypalWebhook] = useState<string>(settings?.paypalWebhook || "");
