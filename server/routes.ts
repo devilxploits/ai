@@ -574,13 +574,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Check if user has reached message limit
-      const messageCount = user.messageCount || 0;
+      // Reset message count to 0 every time a user messages from Telegram/Instagram
+      // This gives them 50 fresh messages per interaction
+      await storage.updateUser(user.id, { messageCount: 0 });
+      
+      // After resetting, the current message count is 0
+      const messageCount = 0;
       const messageLimit = platform === "telegram" 
         ? (settings.telegramMessageLimit || 50)
         : (settings.instagramMessageLimit || 50);
       
-      // Handle message limits
+      // Users now get 50 fresh messages every time they message
+      // We'll still check for the limit to send encouraging messages at the end of their 50 messages
       if (messageCount >= messageLimit && !user.isPaid) {
         // User has reached their limit, send redirect message
         const redirectMessage = platform === "telegram" 
