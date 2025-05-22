@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Helmet } from "react-helmet";
@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { 
   getSettings, updateSettings, createPost, createPhoto, createVideo,
   getSubscriptionPlans, getSubscriptionPlan, createSubscriptionPlan, 
@@ -34,13 +35,28 @@ export default function AdminPanel() {
   const [voiceAccent, setVoiceAccent] = useState<string>(settings?.voiceAccent || "american");
   const [imagePrompt, setImagePrompt] = useState<string>(settings?.imagePrompt || "");
   const [freeMessageLimit, setFreeMessageLimit] = useState<number>(settings?.freeMessageLimit || 1);
+  
+  // Telegram settings
+  const [telegramApiKey, setTelegramApiKey] = useState<string>(settings?.telegramApiKey || "");
+  const [telegramBotUsername, setTelegramBotUsername] = useState<string>(settings?.telegramBotUsername || "");
+  const [telegramChannelId, setTelegramChannelId] = useState<string>(settings?.telegramChannelId || "");
   const [telegramMessageLimit, setTelegramMessageLimit] = useState<number>(settings?.telegramMessageLimit || 50);
-  const [instagramMessageLimit, setInstagramMessageLimit] = useState<number>(settings?.instagramMessageLimit || 50);
   const [telegramRedirectMessage, setTelegramRedirectMessage] = useState<string>(settings?.telegramRedirectMessage || "You've reached your message limit. Visit our website to continue chatting!");
+  const [telegramWebhookUrl, setTelegramWebhookUrl] = useState<string>(settings?.telegramWebhookUrl || "");
+  
+  // Instagram settings
+  const [instagramUsername, setInstagramUsername] = useState<string>(settings?.instagramUsername || "");
+  const [instagramPassword, setInstagramPassword] = useState<string>(settings?.instagramPassword || "");
+  const [instagramApiKey, setInstagramApiKey] = useState<string>(settings?.instagramApiKey || "");
+  const [instagramMessageLimit, setInstagramMessageLimit] = useState<number>(settings?.instagramMessageLimit || 50);
   const [instagramRedirectMessage, setInstagramRedirectMessage] = useState<string>(settings?.instagramRedirectMessage || "You've reached your message limit. Visit our website to continue chatting!");
+  
+  // Payment settings
   const [paypalClientId, setPaypalClientId] = useState<string>(settings?.paypalClientId || "");
   const [paypalSecret, setPaypalSecret] = useState<string>(settings?.paypalSecret || "");
   const [paypalWebhook, setPaypalWebhook] = useState<string>(settings?.paypalWebhook || "");
+  
+  // Automation settings
   const [autoPostEnabled, setAutoPostEnabled] = useState<boolean>(settings?.autoPostEnabled || false);
   const [autoPostTime, setAutoPostTime] = useState<string>(settings?.autoPostTime || "12:00");
   const [autoPostFrequency, setAutoPostFrequency] = useState<number>(settings?.autoPostFrequency || 1);
@@ -177,7 +193,10 @@ export default function AdminPanel() {
       voiceAccent,
       imagePrompt,
       freeMessageLimit,
-      telegramMessageLimit
+      telegramMessageLimit,
+      instagramMessageLimit,
+      telegramRedirectMessage,
+      instagramRedirectMessage
     });
   };
 
@@ -398,31 +417,33 @@ export default function AdminPanel() {
         <meta name="description" content="Admin control panel for Sophia AI Companion. Manage AI settings, content, and user subscriptions." />
       </Helmet>
       
-      <div className="p-4 md:p-6">
-        <h1 className="text-2xl font-display font-semibold mb-6">Admin Panel</h1>
+      <div className="p-3 md:p-6">
+        <h1 className="text-xl md:text-2xl font-display font-semibold mb-4 md:mb-6">Admin Panel</h1>
         
-        <Tabs defaultValue="ai-settings">
-          <TabsList className="mb-6 w-full flex flex-wrap gap-1">
-            <TabsTrigger className="flex-1" value="ai-settings">AI Settings</TabsTrigger>
-            <TabsTrigger className="flex-1" value="content">Content Management</TabsTrigger>
-            <TabsTrigger className="flex-1" value="payment">Payment Settings</TabsTrigger>
-            <TabsTrigger className="flex-1" value="subscriptions">Subscription Plans</TabsTrigger>
-            <TabsTrigger className="flex-1" value="automation">Automation</TabsTrigger>
+        <Tabs defaultValue="ai-settings" className="w-full">
+          <TabsList className="mb-6 w-full flex flex-wrap gap-2">
+            <TabsTrigger className="flex-1 min-w-[120px] text-xs md:text-sm whitespace-nowrap py-2" value="ai-settings">AI Settings</TabsTrigger>
+            <TabsTrigger className="flex-1 min-w-[120px] text-xs md:text-sm whitespace-nowrap py-2" value="social-media">Social Media</TabsTrigger>
+            <TabsTrigger className="flex-1 min-w-[120px] text-xs md:text-sm whitespace-nowrap py-2" value="social-connections">Connections</TabsTrigger>
+            <TabsTrigger className="flex-1 min-w-[120px] text-xs md:text-sm whitespace-nowrap py-2" value="content">Content</TabsTrigger>
+            <TabsTrigger className="flex-1 min-w-[120px] text-xs md:text-sm whitespace-nowrap py-2" value="payment">Payment</TabsTrigger>
+            <TabsTrigger className="flex-1 min-w-[120px] text-xs md:text-sm whitespace-nowrap py-2" value="subscriptions">Subscriptions</TabsTrigger>
+            <TabsTrigger className="flex-1 min-w-[120px] text-xs md:text-sm whitespace-nowrap py-2" value="automation">Automation</TabsTrigger>
           </TabsList>
           
           {/* AI Settings Tab */}
           <TabsContent value="ai-settings">
-            <Card>
-              <CardHeader>
-                <CardTitle>AI Model Settings</CardTitle>
-                <CardDescription>Configure AI model behavior and parameters for chat and voice features.</CardDescription>
+            <Card className="border-0 md:border shadow-none md:shadow">
+              <CardHeader className="px-3 md:px-6 py-4 md:py-6">
+                <CardTitle className="text-lg md:text-xl">AI Model Settings</CardTitle>
+                <CardDescription className="text-xs md:text-sm">Configure AI model behavior and parameters for chat and voice features.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="ai-model">AI Model</Label>
+              <CardContent className="px-3 md:px-6 py-2 md:py-4 space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                  <div className="space-y-1 md:space-y-2">
+                    <Label htmlFor="ai-model" className="text-sm md:text-base">AI Model</Label>
                     <Select value={aiModel} onValueChange={setAiModel}>
-                      <SelectTrigger id="ai-model" className="w-full">
+                      <SelectTrigger id="ai-model" className="w-full h-9 text-xs md:text-sm py-1.5">
                         <SelectValue placeholder="Select AI model" />
                       </SelectTrigger>
                       <SelectContent>
@@ -433,10 +454,10 @@ export default function AdminPanel() {
                     </Select>
                   </div>
                   
-                  <div className="space-y-2">
-                    <Label htmlFor="voice-tone">Voice Tone</Label>
+                  <div className="space-y-1 md:space-y-2">
+                    <Label htmlFor="voice-tone" className="text-sm md:text-base">Voice Tone</Label>
                     <Select value={voiceTone} onValueChange={setVoiceTone}>
-                      <SelectTrigger id="voice-tone" className="w-full">
+                      <SelectTrigger id="voice-tone" className="w-full h-9 text-xs md:text-sm py-1.5">
                         <SelectValue placeholder="Select voice tone" />
                       </SelectTrigger>
                       <SelectContent>
@@ -448,10 +469,10 @@ export default function AdminPanel() {
                     </Select>
                   </div>
                   
-                  <div className="space-y-2">
-                    <Label htmlFor="voice-accent">Voice Accent</Label>
+                  <div className="space-y-1 md:space-y-2">
+                    <Label htmlFor="voice-accent" className="text-sm md:text-base">Voice Accent</Label>
                     <Select value={voiceAccent} onValueChange={setVoiceAccent}>
-                      <SelectTrigger id="voice-accent" className="w-full">
+                      <SelectTrigger id="voice-accent" className="w-full h-9 text-xs md:text-sm py-1.5">
                         <SelectValue placeholder="Select voice accent" />
                       </SelectTrigger>
                       <SelectContent>
@@ -463,49 +484,363 @@ export default function AdminPanel() {
                     </Select>
                   </div>
                   
-                  <div className="space-y-2">
-                    <Label htmlFor="free-message-limit">Free Message Limit</Label>
+                  <div className="space-y-1 md:space-y-2">
+                    <Label htmlFor="free-message-limit" className="text-sm md:text-base">Free Message Limit</Label>
                     <Input
                       id="free-message-limit"
                       type="number"
                       min="1"
                       value={freeMessageLimit}
                       onChange={(e) => setFreeMessageLimit(parseInt(e.target.value))}
-                      className="w-full"
+                      className="w-full h-9 text-xs md:text-sm py-1.5"
                     />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="telegram-message-limit">Telegram Message Limit</Label>
-                    <Input
-                      id="telegram-message-limit"
-                      type="number"
-                      min="1"
-                      value={telegramMessageLimit}
-                      onChange={(e) => setTelegramMessageLimit(parseInt(e.target.value))}
-                      className="w-full"
-                    />
+                    <p className="text-xs md:text-sm text-light-dimmed">Maximum messages for non-premium users</p>
                   </div>
                 </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="image-prompt">Default Image Generation Prompt</Label>
+                <div className="space-y-1 md:space-y-2">
+                  <Label htmlFor="image-prompt" className="text-sm md:text-base">Default Image Generation Prompt</Label>
                   <Textarea
                     id="image-prompt"
                     placeholder="Enter default image generation prompt"
                     value={imagePrompt}
                     onChange={(e) => setImagePrompt(e.target.value)}
-                    rows={4}
+                    rows={3}
+                    className="text-xs md:text-sm py-1.5"
                   />
-                  <p className="text-sm text-light-dimmed">This prompt will be used as the base for all AI image generation</p>
+                  <p className="text-xs md:text-sm text-light-dimmed">Base prompt for all AI image generation</p>
                 </div>
                 
                 <Button 
                   onClick={handleSaveAISettings}
                   disabled={updateSettingsMutation.isPending}
+                  className="mt-2 h-8 md:h-10 text-xs md:text-sm py-1.5"
                 >
                   {updateSettingsMutation.isPending ? "Saving..." : "Save AI Settings"}
                 </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          {/* Social Media Tab */}
+          <TabsContent value="social-media">
+            <Card className="border-0 md:border shadow-none md:shadow">
+              <CardHeader className="px-3 md:px-6 py-4 md:py-6">
+                <CardTitle className="text-lg md:text-xl">Social Media Bot Settings</CardTitle>
+                <CardDescription className="text-xs md:text-sm">Configure settings for Instagram and Telegram bots</CardDescription>
+              </CardHeader>
+              <CardContent className="px-3 md:px-6 py-2 md:py-4 space-y-4">
+                <Alert className="mb-6 bg-primary/10 border-primary/30">
+                  <AlertTitle className="text-primary">Bot Messaging Feature</AlertTitle>
+                  <AlertDescription>
+                    Users will receive 50 fresh messages each time they message the bot on Instagram or Telegram. 
+                    When they reach their limit, they'll receive a customized message encouraging them to visit the website.
+                  </AlertDescription>
+                </Alert>
+              
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Telegram Settings */}
+                  <div className="p-3 md:p-4 border border-gray-800 rounded-lg">
+                    <h3 className="text-lg md:text-xl font-semibold mb-3 md:mb-4">Telegram Bot</h3>
+                    
+                    <div className="space-y-3 md:space-y-4">
+                      <div className="space-y-1 md:space-y-2">
+                        <Label htmlFor="telegram-api-key" className="text-sm md:text-base">API Token</Label>
+                        <Input
+                          id="telegram-api-key"
+                          type="text"
+                          value={telegramApiKey}
+                          onChange={(e) => setTelegramApiKey(e.target.value)}
+                          className="w-full text-xs md:text-sm py-1.5"
+                          placeholder="Enter your Telegram Bot API token"
+                        />
+                        <p className="text-xs md:text-sm text-light-dimmed">Get this from BotFather when you create your bot</p>
+                      </div>
+                      
+                      <div className="space-y-1 md:space-y-2">
+                        <Label htmlFor="telegram-bot-username" className="text-sm md:text-base">Bot Username</Label>
+                        <Input
+                          id="telegram-bot-username"
+                          type="text"
+                          value={telegramBotUsername}
+                          onChange={(e) => setTelegramBotUsername(e.target.value)}
+                          className="w-full text-xs md:text-sm py-1.5"
+                          placeholder="@YourBotUsername"
+                        />
+                      </div>
+                      
+                      <div className="space-y-1 md:space-y-2">
+                        <Label htmlFor="telegram-channel-id" className="text-sm md:text-base">Channel ID</Label>
+                        <Input
+                          id="telegram-channel-id"
+                          type="text"
+                          value={telegramChannelId}
+                          onChange={(e) => setTelegramChannelId(e.target.value)}
+                          className="w-full text-xs md:text-sm py-1.5"
+                          placeholder="@YourChannelName or -1001234567890"
+                        />
+                        <p className="text-xs md:text-sm text-light-dimmed">Channel where users can subscribe for updates</p>
+                      </div>
+                      
+                      <div className="space-y-1 md:space-y-2">
+                        <Label htmlFor="telegram-webhook-url" className="text-sm md:text-base">Webhook URL</Label>
+                        <Input
+                          id="telegram-webhook-url"
+                          type="text"
+                          value={telegramWebhookUrl}
+                          onChange={(e) => setTelegramWebhookUrl(e.target.value)}
+                          className="w-full text-xs md:text-sm py-1.5"
+                          placeholder="https://yoursite.com/api/telegram-webhook"
+                        />
+                        <p className="text-xs md:text-sm text-light-dimmed">The URL Telegram will send updates to</p>
+                      </div>
+                      
+                      <div className="space-y-1 md:space-y-2">
+                        <Label htmlFor="telegram-message-limit" className="text-sm md:text-base">Message Limit</Label>
+                        <Input
+                          id="telegram-message-limit"
+                          type="number"
+                          min="1"
+                          value={telegramMessageLimit}
+                          onChange={(e) => setTelegramMessageLimit(parseInt(e.target.value))}
+                          className="w-full text-xs md:text-sm py-1.5"
+                        />
+                        <p className="text-xs md:text-sm text-light-dimmed">Number of messages per interaction</p>
+                      </div>
+                      
+                      <div className="space-y-1 md:space-y-2">
+                        <Label htmlFor="telegram-redirect-message" className="text-sm md:text-base">Redirect Message</Label>
+                        <Textarea
+                          id="telegram-redirect-message"
+                          placeholder="Message to show when Telegram users reach their limit"
+                          value={telegramRedirectMessage}
+                          onChange={(e) => setTelegramRedirectMessage(e.target.value)}
+                          rows={2}
+                          className="text-xs md:text-sm py-1.5"
+                        />
+                        <p className="text-xs md:text-sm text-light-dimmed">Message shown when users reach their limit</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Instagram Settings */}
+                  <div className="p-3 md:p-4 border border-gray-800 rounded-lg">
+                    <h3 className="text-lg md:text-xl font-semibold mb-3 md:mb-4">Instagram Bot</h3>
+                    
+                    <div className="space-y-3 md:space-y-4">
+                      <div className="space-y-1 md:space-y-2">
+                        <Label htmlFor="instagram-username" className="text-sm md:text-base">Username</Label>
+                        <Input
+                          id="instagram-username"
+                          type="text"
+                          value={instagramUsername}
+                          onChange={(e) => setInstagramUsername(e.target.value)}
+                          className="w-full text-xs md:text-sm py-1.5"
+                          placeholder="Your Instagram username"
+                        />
+                      </div>
+                      
+                      <div className="space-y-1 md:space-y-2">
+                        <Label htmlFor="instagram-password" className="text-sm md:text-base">Password</Label>
+                        <Input
+                          id="instagram-password"
+                          type="password"
+                          value={instagramPassword}
+                          onChange={(e) => setInstagramPassword(e.target.value)}
+                          className="w-full text-xs md:text-sm py-1.5"
+                          placeholder="Your Instagram password"
+                        />
+                        <p className="text-xs md:text-sm text-light-dimmed">Stored securely in your database</p>
+                      </div>
+                      
+                      <div className="space-y-1 md:space-y-2">
+                        <Label htmlFor="instagram-api-key" className="text-sm md:text-base">API Key</Label>
+                        <Input
+                          id="instagram-api-key"
+                          type="text"
+                          value={instagramApiKey}
+                          onChange={(e) => setInstagramApiKey(e.target.value)}
+                          className="w-full text-xs md:text-sm py-1.5"
+                          placeholder="Your Instagram API key"
+                        />
+                        <p className="text-xs md:text-sm text-light-dimmed">For Instagram Graph API</p>
+                      </div>
+                      
+                      <div className="space-y-1 md:space-y-2">
+                        <Label htmlFor="instagram-message-limit" className="text-sm md:text-base">Message Limit</Label>
+                        <Input
+                          id="instagram-message-limit"
+                          type="number"
+                          min="1"
+                          value={instagramMessageLimit}
+                          onChange={(e) => setInstagramMessageLimit(parseInt(e.target.value))}
+                          className="w-full text-xs md:text-sm py-1.5"
+                        />
+                        <p className="text-xs md:text-sm text-light-dimmed">Number of messages per interaction</p>
+                      </div>
+                      
+                      <div className="space-y-1 md:space-y-2">
+                        <Label htmlFor="instagram-redirect-message" className="text-sm md:text-base">Redirect Message</Label>
+                        <Textarea
+                          id="instagram-redirect-message"
+                          placeholder="Message to show when Instagram users reach their limit"
+                          value={instagramRedirectMessage}
+                          onChange={(e) => setInstagramRedirectMessage(e.target.value)}
+                          rows={2}
+                          className="text-xs md:text-sm py-1.5"
+                        />
+                        <p className="text-xs md:text-sm text-light-dimmed">Message shown when users reach their limit</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <Button 
+                  onClick={() => {
+                    updateSettingsMutation.mutate({
+                      // Telegram settings
+                      telegramApiKey,
+                      telegramBotUsername,
+                      telegramChannelId,
+                      telegramWebhookUrl,
+                      telegramMessageLimit,
+                      telegramRedirectMessage,
+                      
+                      // Instagram settings
+                      instagramUsername,
+                      instagramPassword,
+                      instagramApiKey,
+                      instagramMessageLimit,
+                      instagramRedirectMessage
+                    });
+                  }}
+                  disabled={updateSettingsMutation.isPending}
+                  className="mt-6"
+                >
+                  {updateSettingsMutation.isPending ? "Saving..." : "Save Social Media Settings"}
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          {/* Social Connections Tab */}
+          <TabsContent value="social-connections">
+            <Card className="border-0 md:border shadow-none md:shadow">
+              <CardHeader className="px-3 md:px-6 py-4 md:py-6">
+                <CardTitle className="text-lg md:text-xl">Social Media Connections</CardTitle>
+                <CardDescription className="text-xs md:text-sm">Manage users connecting through Instagram and Telegram platforms</CardDescription>
+              </CardHeader>
+              <CardContent className="px-3 md:px-6 py-2 md:py-4 space-y-4">
+                <Alert className="mb-3 md:mb-4 bg-primary/10 border-primary/30 p-3 md:p-4">
+                  <AlertTitle className="text-primary text-sm md:text-base">Connection Management</AlertTitle>
+                  <AlertDescription className="text-xs md:text-sm">
+                    Users connecting through Instagram or Telegram receive 50 fresh messages with each new interaction.
+                    You can reset their message count or remove connections from this panel.
+                  </AlertDescription>
+                </Alert>
+                
+                <Tabs defaultValue="telegram">
+                  <TabsList className="mb-4 flex">
+                    <TabsTrigger className="flex-1 text-xs md:text-sm py-2" value="telegram">Telegram Users</TabsTrigger>
+                    <TabsTrigger className="flex-1 text-xs md:text-sm py-2" value="instagram">Instagram Users</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="telegram">
+                    <div className="border border-gray-800 rounded-lg overflow-hidden">
+                      <div className="overflow-x-auto">
+                        <table className="w-full">
+                          <thead>
+                            <tr className="bg-dark-card">
+                              <th className="px-2 md:px-4 py-3 text-left text-xs md:text-sm">Telegram ID</th>
+                              <th className="px-2 md:px-4 py-3 text-left text-xs md:text-sm">Username</th>
+                              <th className="px-2 md:px-4 py-3 text-left text-xs md:text-sm hidden md:table-cell">Messages</th>
+                              <th className="px-2 md:px-4 py-3 text-left text-xs md:text-sm hidden md:table-cell">Last Interaction</th>
+                              <th className="px-2 md:px-4 py-3 text-left text-xs md:text-sm">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-800">
+                            {/* Example data - will be replaced with actual data */}
+                            <tr className="hover:bg-gray-900/40">
+                              <td className="px-2 md:px-4 py-2 md:py-3 text-xs md:text-sm">1234567890</td>
+                              <td className="px-2 md:px-4 py-2 md:py-3 text-xs md:text-sm">@telegram_user1</td>
+                              <td className="px-2 md:px-4 py-2 md:py-3 text-xs md:text-sm hidden md:table-cell">32/50</td>
+                              <td className="px-2 md:px-4 py-2 md:py-3 text-xs md:text-sm hidden md:table-cell">Today, 10:15 AM</td>
+                              <td className="px-2 md:px-4 py-2 md:py-3">
+                                <div className="flex flex-col space-y-1 md:flex-row md:space-y-0 md:space-x-2">
+                                  <Button size="sm" className="text-xs px-2 py-1" variant="outline">Reset</Button>
+                                  <Button size="sm" className="text-xs px-2 py-1" variant="destructive">Remove</Button>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr className="hover:bg-gray-900/40">
+                              <td className="px-2 md:px-4 py-2 md:py-3 text-xs md:text-sm">9876543210</td>
+                              <td className="px-2 md:px-4 py-2 md:py-3 text-xs md:text-sm">@telegram_user2</td>
+                              <td className="px-2 md:px-4 py-2 md:py-3 text-xs md:text-sm hidden md:table-cell">50/50</td>
+                              <td className="px-2 md:px-4 py-2 md:py-3 text-xs md:text-sm hidden md:table-cell">Yesterday, 5:30 PM</td>
+                              <td className="px-2 md:px-4 py-2 md:py-3">
+                                <div className="flex flex-col space-y-1 md:flex-row md:space-y-0 md:space-x-2">
+                                  <Button size="sm" className="text-xs px-2 py-1" variant="outline">Reset</Button>
+                                  <Button size="sm" className="text-xs px-2 py-1" variant="destructive">Remove</Button>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div className="p-4 bg-dark-card border-t border-gray-800 flex justify-between items-center">
+                        <p className="text-sm text-light-dimmed">Showing telegram users with active connections</p>
+                      </div>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="instagram">
+                    <div className="border border-gray-800 rounded-lg overflow-hidden">
+                      <div className="overflow-x-auto">
+                        <table className="w-full">
+                          <thead>
+                            <tr className="bg-dark-card">
+                              <th className="px-2 md:px-4 py-3 text-left text-xs md:text-sm">Instagram ID</th>
+                              <th className="px-2 md:px-4 py-3 text-left text-xs md:text-sm">Username</th>
+                              <th className="px-2 md:px-4 py-3 text-left text-xs md:text-sm hidden md:table-cell">Messages</th>
+                              <th className="px-2 md:px-4 py-3 text-left text-xs md:text-sm hidden md:table-cell">Last Interaction</th>
+                              <th className="px-2 md:px-4 py-3 text-left text-xs md:text-sm">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-800">
+                            {/* Example data - will be replaced with actual data */}
+                            <tr className="hover:bg-gray-900/40">
+                              <td className="px-2 md:px-4 py-2 md:py-3 text-xs md:text-sm">insta_id_123456</td>
+                              <td className="px-2 md:px-4 py-2 md:py-3 text-xs md:text-sm">@insta_user1</td>
+                              <td className="px-2 md:px-4 py-2 md:py-3 text-xs md:text-sm hidden md:table-cell">45/50</td>
+                              <td className="px-2 md:px-4 py-2 md:py-3 text-xs md:text-sm hidden md:table-cell">Today, 9:30 AM</td>
+                              <td className="px-2 md:px-4 py-2 md:py-3">
+                                <div className="flex flex-col space-y-1 md:flex-row md:space-y-0 md:space-x-2">
+                                  <Button size="sm" className="text-xs px-2 py-1" variant="outline">Reset</Button>
+                                  <Button size="sm" className="text-xs px-2 py-1" variant="destructive">Remove</Button>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr className="hover:bg-gray-900/40">
+                              <td className="px-2 md:px-4 py-2 md:py-3 text-xs md:text-sm">insta_id_987654</td>
+                              <td className="px-2 md:px-4 py-2 md:py-3 text-xs md:text-sm">@insta_user2</td>
+                              <td className="px-2 md:px-4 py-2 md:py-3 text-xs md:text-sm hidden md:table-cell">18/50</td>
+                              <td className="px-2 md:px-4 py-2 md:py-3 text-xs md:text-sm hidden md:table-cell">Yesterday, 11:45 AM</td>
+                              <td className="px-2 md:px-4 py-2 md:py-3">
+                                <div className="flex flex-col space-y-1 md:flex-row md:space-y-0 md:space-x-2">
+                                  <Button size="sm" className="text-xs px-2 py-1" variant="outline">Reset</Button>
+                                  <Button size="sm" className="text-xs px-2 py-1" variant="destructive">Remove</Button>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div className="p-4 bg-dark-card border-t border-gray-800 flex justify-between items-center">
+                        <p className="text-sm text-light-dimmed">Showing instagram users with active connections</p>
+                      </div>
+                    </div>
+                  </TabsContent>
+                </Tabs>
               </CardContent>
             </Card>
           </TabsContent>
