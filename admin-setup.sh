@@ -1,13 +1,12 @@
 #!/bin/bash
 
-# Apply admin user privileges first
-echo "Setting up admin user privileges..."
+# Script to apply admin user privileges
+# This script ensures the admin user always has full access to all features
 
-# Check if admin config file exists
-if [ ! -f "./server/admin-config.ts" ]; then
-  # Create admin config file if it doesn't exist
-  echo "Creating admin configuration file..."
-  cat > ./server/admin-config.ts << EOL
+echo "Applying special admin user privileges..."
+
+# Create a configuration file that will be loaded during startup
+cat > ./server/admin-config.ts << EOL
 // Special configuration for admin users
 // This file ensures admin users have full access to all features
 
@@ -25,9 +24,7 @@ export const ADMIN_CONFIG = {
   unlimitedAccess: true
 };
 EOL
-  echo "Admin configuration file created successfully!"
-fi
 
-# Start the development server
-echo "Starting the development server..."
-NODE_ENV=development npx tsx server/index.ts
+# Success message
+echo "Admin user privileges configured successfully!"
+echo "Admin users will now have full access to all features without restrictions."
