@@ -94,13 +94,20 @@ export class MemStorage implements IStorage {
     this.callAutoInc = 1;
     this.subscriptionPlanAutoInc = 1;
     
-    // Initialize with admin user
+    // Initialize with admin user - admins get full access without restrictions
     this.createUser({
       username: 'admin',
       password: 'admin',
       email: 'admin@sophia.ai'
     }).then(user => {
-      this.updateUser(user.id, { isAdmin: true });
+      // Set admin privileges - this will be applied on every deployment
+      this.updateUser(user.id, { 
+        isAdmin: true, 
+        isPaid: true,  // Give admin users paid status automatically
+        subscriptionPlan: "vip", // Assign VIP subscription
+        // Set a far future expiry date (10 years from now)
+        subscriptionExpiry: new Date(new Date().setFullYear(new Date().getFullYear() + 10))
+      });
     });
     
     // Initialize with default settings

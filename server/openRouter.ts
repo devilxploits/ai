@@ -37,15 +37,20 @@ export async function generateAIResponse(
     throw new Error("Settings not found");
   }
   
-  // Get user to check if they're paid
+  // Get user to check if they're paid or admin
   const user = await storage.getUser(userId);
   
   if (!user) {
     throw new Error("User not found");
   }
   
+  // Admin users have full access without restrictions
+  if (user.isAdmin) {
+    // Admin users have unlimited access, no need to check or increment message count
+    console.log("Admin user detected - granting unlimited access");
+  }
   // Check message limits for free users
-  if (!user.isPaid) {
+  else if (!user.isPaid) {
     const messageCount = user.messageCount ?? 0;
     const freeLimit = settings.freeMessageLimit ?? 1;
     

@@ -346,8 +346,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (req.session.userId) {
         const user = await storage.getUser(req.session.userId);
         
-        if (user && user.isPaid) {
-          // Paid users can see all photos
+        if (user && (user.isPaid || user.isAdmin)) {
+          // Paid users and admins can see all photos
           photos = await storage.getPhotos();
         } else {
           // Free users can only see non-premium photos
@@ -373,7 +373,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Photo not found" });
       }
       
-      // Check if photo is premium and user is not paid
+      // Check if photo is premium and user is not paid or admin
       if (photo.isPremium) {
         if (!req.session.userId) {
           return res.status(403).json({ message: "Premium content requires login" });
@@ -381,7 +381,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         const user = await storage.getUser(req.session.userId);
         
-        if (!user || !user.isPaid) {
+        if (!user || (!user.isPaid && !user.isAdmin)) {
           return res.status(403).json({ message: "Premium content requires subscription" });
         }
       }
@@ -443,8 +443,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (req.session.userId) {
         const user = await storage.getUser(req.session.userId);
         
-        if (user && user.isPaid) {
-          // Paid users can see all videos
+        if (user && (user.isPaid || user.isAdmin)) {
+          // Paid users and admins can see all videos
           videos = await storage.getVideos();
         } else {
           // Free users can only see non-premium videos
@@ -470,7 +470,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Video not found" });
       }
       
-      // Check if video is premium and user is not paid
+      // Check if video is premium and user is not paid or admin
       if (video.isPremium) {
         if (!req.session.userId) {
           return res.status(403).json({ message: "Premium content requires login" });
@@ -478,7 +478,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         const user = await storage.getUser(req.session.userId);
         
-        if (!user || !user.isPaid) {
+        if (!user || (!user.isPaid && !user.isAdmin)) {
           return res.status(403).json({ message: "Premium content requires subscription" });
         }
       }
