@@ -23,6 +23,30 @@ export default function AdminPanel() {
   
   // Custom tab state
   const [activeTab, setActiveTab] = useState<string>('ai-settings');
+  
+  // API Configuration states
+  // OpenRouter API
+  const [openRouterApiKey, setOpenRouterApiKey] = useState<string>("");
+  
+  // AI Models
+  const [useMythoMax, setUseMythoMax] = useState<boolean>(true);
+  const [useOpenHermes, setUseOpenHermes] = useState<boolean>(true);
+  const [useDeepseek, setUseDeepseek] = useState<boolean>(true);
+  
+  // Voice/Audio APIs
+  const [piperTTSEnabled, setPiperTTSEnabled] = useState<boolean>(true);
+  const [whisperEnabled, setWhisperEnabled] = useState<boolean>(true);
+  
+  // Communication APIs
+  const [webRTCEnabled, setWebRTCEnabled] = useState<boolean>(true);
+  const [socketIOEnabled, setSocketIOEnabled] = useState<boolean>(true);
+  
+  // Image Generation
+  const [googleCollabUrl, setGoogleCollabUrl] = useState<string>("");
+  const [automatic1111Url, setAutomatic1111Url] = useState<string>("");
+  const [stableDiffusionModel, setStableDiffusionModel] = useState<string>("RealisticVision");
+  const [dreamBoothEnabled, setDreamBoothEnabled] = useState<boolean>(true);
+  const [loraEnabled, setLoraEnabled] = useState<boolean>(true);
 
   // Get current settings
   const { data: settings, isLoading } = useQuery({
@@ -102,6 +126,30 @@ export default function AdminPanel() {
       setVoiceAccent(settings.voiceAccent || "american");
       setImagePrompt(settings.imagePrompt || "");
       setFreeMessageLimit(settings.freeMessageLimit || 1);
+      
+      // API Configuration settings
+      // OpenRouter API
+      setOpenRouterApiKey(settings.openRouterApiKey || "");
+      
+      // AI Models
+      setUseMythoMax(settings.useMythoMax === false ? false : true);
+      setUseOpenHermes(settings.useOpenHermes === false ? false : true);
+      setUseDeepseek(settings.useDeepseek === false ? false : true);
+      
+      // Voice/Audio APIs
+      setPiperTTSEnabled(settings.piperTTSEnabled === false ? false : true);
+      setWhisperEnabled(settings.whisperEnabled === false ? false : true);
+      
+      // Communication APIs
+      setWebRTCEnabled(settings.webRTCEnabled === false ? false : true);
+      setSocketIOEnabled(settings.socketIOEnabled === false ? false : true);
+      
+      // Image Generation
+      setGoogleCollabUrl(settings.googleCollabUrl || "");
+      setAutomatic1111Url(settings.automatic1111Url || "");
+      setStableDiffusionModel(settings.stableDiffusionModel || "RealisticVision");
+      setDreamBoothEnabled(settings.dreamBoothEnabled === false ? false : true);
+      setLoraEnabled(settings.loraEnabled === false ? false : true);
       
       // Telegram settings
       setTelegramApiKey(settings.telegramApiKey || "");
@@ -224,6 +272,11 @@ export default function AdminPanel() {
 
   // Save AI settings
   const handleSaveAISettings = () => {
+    toast({
+      title: "Saving Changes",
+      description: "Updating AI settings..."
+    });
+    
     updateSettingsMutation.mutate({
       aiModel,
       voiceTone,
@@ -234,6 +287,42 @@ export default function AdminPanel() {
       instagramMessageLimit,
       telegramRedirectMessage,
       instagramRedirectMessage
+    });
+  };
+
+  // Save API configuration settings
+  const handleSaveAPIConfig = () => {
+    toast({
+      title: "Saving Changes",
+      description: "Updating API configuration..."
+    });
+    
+    updateSettingsMutation.mutate({
+      // OpenRouter API
+      openRouterApiKey,
+      
+      // AI Models
+      useMythoMax,
+      useOpenHermes,
+      useDeepseek,
+      
+      // Voice/Audio APIs
+      piperTTSEnabled,
+      whisperEnabled,
+      
+      // Communication APIs
+      webRTCEnabled, 
+      socketIOEnabled,
+      
+      // Image Generation
+      googleCollabUrl,
+      automatic1111Url,
+      stableDiffusionModel,
+      useRealisticVision: stableDiffusionModel === "RealisticVision",
+      useDreamshaper: stableDiffusionModel === "DreamShaper",
+      useDeliberate: stableDiffusionModel === "Deliberate",
+      dreamBoothEnabled,
+      loraEnabled
     });
   };
 
@@ -458,6 +547,12 @@ export default function AdminPanel() {
           onClick={() => setActiveTab('ai-settings')}
         >
           AI Settings
+        </button>
+        <button 
+          className={`bg-gray-800 border border-gray-700 text-white rounded-lg p-4 ${activeTab === 'api-config' ? 'bg-gray-700' : ''}`}
+          onClick={() => setActiveTab('api-config')}
+        >
+          API Configuration
         </button>
         <button 
           className={`bg-gray-800 border border-gray-700 text-white rounded-lg p-4 ${activeTab === 'social-media' ? 'bg-gray-700' : ''}`}
@@ -1097,6 +1192,238 @@ Priority support"
                 </div>
               )}
             </div>
+          </CardContent>
+        </Card>
+      )}
+      
+      {/* API Configuration Tab */}
+      {activeTab === 'api-config' && (
+        <Card className="border-0 md:border shadow-none md:shadow">
+          <CardHeader className="px-3 md:px-6 py-4 md:py-6">
+            <CardTitle className="text-lg md:text-xl">API Configuration</CardTitle>
+            <CardDescription className="text-xs md:text-sm">Manage API keys and service configurations for all integrations.</CardDescription>
+          </CardHeader>
+          <CardContent className="px-3 md:px-6 py-2 md:py-4 space-y-4">
+            
+            {/* OpenRouter API Section */}
+            <div className="p-4 bg-gray-800 rounded-lg space-y-4">
+              <h3 className="text-lg font-medium">OpenRouter API</h3>
+              <p className="text-sm text-gray-400">Configure OpenRouter for AI text generation. Only NSFW-compatible models will be used.</p>
+              
+              <div className="space-y-2">
+                <Label htmlFor="openrouter-api-key">OpenRouter API Key</Label>
+                <Input 
+                  id="openrouter-api-key" 
+                  type="password"
+                  value={openRouterApiKey}
+                  onChange={(e) => setOpenRouterApiKey(e.target.value)}
+                  placeholder="sk-or-..." 
+                />
+                <p className="text-xs text-gray-500">Get your API key from <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">openrouter.ai/keys</a></p>
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Available AI Models</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="model-mythomax" 
+                      checked={useMythoMax}
+                      onCheckedChange={setUseMythoMax}
+                    />
+                    <Label htmlFor="model-mythomax">MythoMax-L2 (Best for explicit content)</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="model-openhermes" 
+                      checked={useOpenHermes}
+                      onCheckedChange={setUseOpenHermes}
+                    />
+                    <Label htmlFor="model-openhermes">OpenHermes-2.5-Mistral (Balanced conversations)</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="model-deepseek" 
+                      checked={useDeepseek}
+                      onCheckedChange={setUseDeepseek}
+                    />
+                    <Label htmlFor="model-deepseek">Deepseek-Chat-7B-NSFW (General conversation)</Label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Voice/Audio API Section */}
+            <div className="p-4 bg-gray-800 rounded-lg space-y-4">
+              <h3 className="text-lg font-medium">Voice & Audio APIs</h3>
+              <p className="text-sm text-gray-400">Configure text-to-speech and speech-to-text services.</p>
+              
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="piper-tts-enabled" 
+                      checked={piperTTSEnabled}
+                      onCheckedChange={setPiperTTSEnabled}
+                    />
+                    <Label htmlFor="piper-tts-enabled">Piper TTS (Text-to-Speech)</Label>
+                  </div>
+                  <span className="text-xs text-gray-500">Self-hosted</span>
+                </div>
+                <p className="text-xs text-gray-500">Piper TTS generates natural, seductive voice for AI responses</p>
+              </div>
+              
+              <div className="space-y-2 mt-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="whisper-enabled" 
+                      checked={whisperEnabled}
+                      onCheckedChange={setWhisperEnabled}
+                    />
+                    <Label htmlFor="whisper-enabled">Whisper (Speech-to-Text)</Label>
+                  </div>
+                  <span className="text-xs text-gray-500">Self-hosted</span>
+                </div>
+                <p className="text-xs text-gray-500">Whisper converts user's voice to text during voice calls</p>
+              </div>
+            </div>
+            
+            {/* Communication APIs Section */}
+            <div className="p-4 bg-gray-800 rounded-lg space-y-4">
+              <h3 className="text-lg font-medium">Communication APIs</h3>
+              <p className="text-sm text-gray-400">Configure real-time communication services.</p>
+              
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="webrtc-enabled" 
+                      checked={webRTCEnabled}
+                      onCheckedChange={setWebRTCEnabled}
+                    />
+                    <Label htmlFor="webrtc-enabled">WebRTC (Voice/Video Calls)</Label>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500">Enables voice calls between users and AI companion</p>
+              </div>
+              
+              <div className="space-y-2 mt-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="socketio-enabled" 
+                      checked={socketIOEnabled}
+                      onCheckedChange={setSocketIOEnabled}
+                    />
+                    <Label htmlFor="socketio-enabled">Socket.IO (Real-time Chat)</Label>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500">Powers real-time chat messaging with instant responses</p>
+              </div>
+            </div>
+            
+            {/* Image Generation APIs Section */}
+            <div className="p-4 bg-gray-800 rounded-lg space-y-4">
+              <h3 className="text-lg font-medium">Image Generation APIs</h3>
+              <p className="text-sm text-gray-400">Configure AI image generation services (Stable Diffusion).</p>
+              
+              <div className="space-y-2">
+                <Label htmlFor="google-collab-url">Google Colab URL</Label>
+                <Input 
+                  id="google-collab-url" 
+                  value={googleCollabUrl}
+                  onChange={(e) => setGoogleCollabUrl(e.target.value)}
+                  placeholder="https://colab.research.google.com/drive/..." 
+                />
+                <p className="text-xs text-gray-500">Enter your Google Colab notebook URL for Stable Diffusion</p>
+              </div>
+              
+              <div className="space-y-2 mt-3">
+                <Label htmlFor="automatic1111-url">Automatic1111 URL</Label>
+                <Input 
+                  id="automatic1111-url" 
+                  value={automatic1111Url}
+                  onChange={(e) => setAutomatic1111Url(e.target.value)}
+                  placeholder="http://127.0.0.1:7860" 
+                />
+                <p className="text-xs text-gray-500">URL for your Automatic1111 Stable Diffusion Web UI</p>
+              </div>
+              
+              <div className="space-y-2 mt-4">
+                <Label>Stable Diffusion Models</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="realistic-vision" 
+                      checked={stableDiffusionModel === "RealisticVision" || true}
+                      onCheckedChange={(checked) => {
+                        if (checked) setStableDiffusionModel("RealisticVision");
+                      }}
+                    />
+                    <Label htmlFor="realistic-vision">RealisticVision</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="dreamshaper" 
+                      checked={stableDiffusionModel === "DreamShaper" || false}
+                      onCheckedChange={(checked) => {
+                        if (checked) setStableDiffusionModel("DreamShaper");
+                      }}
+                    />
+                    <Label htmlFor="dreamshaper">DreamShaper</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="deliberate" 
+                      checked={stableDiffusionModel === "Deliberate" || false}
+                      onCheckedChange={(checked) => {
+                        if (checked) setStableDiffusionModel("Deliberate");
+                      }}
+                    />
+                    <Label htmlFor="deliberate">Deliberate</Label>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="space-y-2 mt-4">
+                <Label>Training Methods</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Switch 
+                        id="dreambooth-enabled" 
+                        checked={dreamBoothEnabled}
+                        onCheckedChange={setDreamBoothEnabled}
+                      />
+                      <Label htmlFor="dreambooth-enabled">DreamBooth (Face Training)</Label>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500">Trains AI to generate consistent face images</p>
+                </div>
+                
+                <div className="space-y-2 mt-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Switch 
+                        id="lora-enabled" 
+                        checked={loraEnabled}
+                        onCheckedChange={setLoraEnabled}
+                      />
+                      <Label htmlFor="lora-enabled">LoRA (Body Training)</Label>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500">Trains AI to generate consistent body features</p>
+                </div>
+              </div>
+            </div>
+            
+            <Button 
+              onClick={handleSaveAPIConfig} 
+              className="w-full"
+            >
+              Save API Configuration
+            </Button>
           </CardContent>
         </Card>
       )}
