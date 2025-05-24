@@ -104,6 +104,33 @@ export const settings = pgTable("settings", {
   paypalSecret: text("paypal_secret"),
   paypalWebhook: text("paypal_webhook"),
   
+  // API Configuration Settings
+  // OpenRouter API
+  openRouterApiKey: text("openrouter_api_key"),
+  
+  // AI Models
+  useMythoMax: boolean("use_mythomax").default(true),
+  useOpenHermes: boolean("use_openhermes").default(true),
+  useDeepseek: boolean("use_deepseek").default(true),
+  
+  // Voice/Audio APIs
+  piperTTSEnabled: boolean("piper_tts_enabled").default(true),
+  whisperEnabled: boolean("whisper_enabled").default(true),
+  
+  // Communication APIs
+  webRTCEnabled: boolean("webrtc_enabled").default(true),
+  socketIOEnabled: boolean("socketio_enabled").default(true),
+  
+  // Image Generation
+  googleCollabUrl: text("google_collab_url"),
+  automatic1111Url: text("automatic1111_url"),
+  stableDiffusionModel: text("stable_diffusion_model").default("RealisticVision"),
+  useRealisticVision: boolean("use_realistic_vision").default(true),
+  useDreamshaper: boolean("use_dreamshaper").default(true),
+  useDeliberate: boolean("use_deliberate").default(true),
+  dreamBoothEnabled: boolean("dreambooth_enabled").default(true),
+  loraEnabled: boolean("lora_enabled").default(true),
+  
   // Automation Settings
   autoPostEnabled: boolean("auto_post_enabled").default(false),
   autoPostTime: text("auto_post_time").default("12:00"),
