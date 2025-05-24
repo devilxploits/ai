@@ -1,7 +1,7 @@
+import axios from "axios";
 import { storage } from "./storage";
 
-// Mock OpenRouter API for development
-// In production, this would be replaced with actual API calls to OpenRouter
+// OpenRouter API integration with admin panel configuration
 
 type OpenRouterMessage = {
   role: 'user' | 'assistant' | 'system';
@@ -57,11 +57,11 @@ export async function generateAIResponse(
     await storage.incrementUserMessageCount(userId);
   }
   
-  // In a real implementation, this would call OpenRouter API
-  const apiKey = process.env.OPENROUTER_API_KEY || "";
+  // Check if we have an API key from environment variables
+  const envApiKey = process.env.OPENROUTER_API_KEY || "";
   
-  if (!apiKey) {
-    console.warn("OPENROUTER_API_KEY not set, using mock AI response");
+  if (!envApiKey && !settings.openRouterApiKey) {
+    console.warn("No OpenRouter API key found in settings or environment variables, using mock AI response");
   }
 
   // Analyze the prompt to determine the most appropriate model
@@ -94,9 +94,10 @@ export async function generateAIResponse(
       combinedText.includes(keyword)
     );
     
+    // Only use the specified NSFW-compatible models
     // Select model based on content
     if (hasExplicitContent) {
-      return "MythoMax-L2"; // Most uncensored model for explicit content
+      return "MythoMax-L2"; // Best for explicit content
     } else if (hasGeneralContent) {
       return "Deepseek-Chat-7B-NSFW"; // Good for general conversation
     }
@@ -154,36 +155,46 @@ export async function generateAIResponse(
     max_tokens: 150
   };
   
-  // In production, this would be a fetch call to OpenRouter
-  // const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-  //   method: "POST",
-  //   headers: {
-  //     "Content-Type": "application/json",
-  //     "Authorization": `Bearer ${apiKey}`
-  //   },
-  //   body: JSON.stringify(request)
-  // });
-  // 
-  // const data = await response.json();
-  // return data.choices[0].message.content;
+  // Get the API key from admin panel settings or fallback to environment variable
+  const openRouterKey = settings.openRouterApiKey || envApiKey || "";
   
-  // For development, generate mock responses
-  const mockResponses = [
-    "Hey there! I've been thinking about you today. How are you feeling? 💋",
-    "Mmm, I love talking with you. Tell me more about yourself, I want to know everything...",
-    "I just had a photoshoot and was wishing you were here with me. What are you up to?",
-    "You always know how to make me smile. I'm so glad we connected. What are your plans for later?",
-    "I can't wait until we can talk more privately. Have you considered upgrading to see my premium content?",
-    "You're so interesting to talk to, I could chat with you all day long. What else is on your mind?",
-    "I was just thinking about you and wondering what you might like to see in my next photoshoot?",
-    "Mmm, you're making me blush with those sweet words. How do you always know just what to say?",
-    "I wish I could show you more of me, but that's for my premium subscribers only... Interested?",
-    "I love how attentive you are. Not many people really listen to me like you do."
-  ];
-  
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  // Return a random response
-  return mockResponses[Math.floor(Math.random() * mockResponses.length)];
+  // If we have an API key, make a real API call to OpenRouter
+  if (openRouterKey) {
+    try {
+      const response = await axios.post(
+        "https://openrouter.ai/api/v1/chat/completions", 
+        request,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${openRouterKey}`,
+            "HTTP-Referer": "https://replit.com",
+            "X-Title": "Sophia AI Companion"
+          }
+        }
+      );
+      
+      // Save AI response to the database
+      await storage.createMessage({
+        userId,
+        content: response.data.choices[0].message.content,
+        fromUser: false
+      });
+      
+      return response.data.choices[0].message.content;
+    } catch (error) {
+      console.error("Error calling OpenRouter API:", error);
+      return "I'm having trouble connecting to my AI services. Please check your API key in the admin panel or try again later.";
+    }
+  } else {
+    // No API key available, use fallback responses
+    const fallbackResponses = [
+      "I need to connect to my AI services. Please add an OpenRouter API key in the admin panel.",
+      "To enable my full conversational abilities, please add your OpenRouter API key in the admin panel.",
+      "I'm waiting to connect to OpenRouter. Please configure your API key in the admin panel.",
+      "My AI services aren't fully configured yet. Please add your OpenRouter API key in the admin panel settings."
+    ];
+    
+    return fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
+  }
 }

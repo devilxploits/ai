@@ -586,13 +586,41 @@ export class MemStorage implements IStorage {
         voiceAccent: "american",
         imagePrompt: "full body ultra realistic photo of seductive blonde woman soft skin natural curves beautiful eyes same face each time",
         freeMessageLimit: 1,
+        
+        // API Configuration Settings
+        openRouterApiKey: "",
+        piperTTSEnabled: true,
+        whisperEnabled: true,
+        webRTCEnabled: true,
+        socketIOEnabled: true,
+        stableDiffusionModel: "RealisticVision",
+        dreamBoothEnabled: true,
+        loraEnabled: true,
+        
+        // Social Media Settings
+        telegramApiKey: "",
+        telegramBotUsername: "",
+        telegramChannelId: "",
         telegramMessageLimit: 50,
+        telegramRedirectMessage: "You've reached your message limit. Visit our website to continue chatting!",
+        telegramWebhookUrl: "",
+        
+        instagramUsername: "",
+        instagramPassword: "",
+        instagramApiKey: "",
+        instagramMessageLimit: 50,
+        instagramRedirectMessage: "You've reached your message limit. Visit our website to continue chatting!",
+        
+        // Payment Settings
         paypalClientId: "",
         paypalSecret: "",
         paypalWebhook: "",
+        
+        // Automation Settings
         autoPostEnabled: false,
         autoPostTime: "12:00",
         autoPostFrequency: 1,
+        
         lastUpdated: new Date()
       };
     }
