@@ -105,13 +105,12 @@ export const settings = pgTable("settings", {
   paypalWebhook: text("paypal_webhook"),
   
   // API Configuration Settings
-  // OpenRouter API
-  openRouterApiKey: text("openrouter_api_key"),
+  // Hugging Face API
+  huggingFaceApiKey: text("huggingface_api_key"),
   
   // AI Models
-  useMythoMax: boolean("use_mythomax").default(true),
-  useOpenHermes: boolean("use_openhermes").default(true),
-  useDeepseek: boolean("use_deepseek").default(true),
+  useDialoGPT: boolean("use_dialogpt").default(true),
+  useBlenderBot: boolean("use_blenderbot").default(true),
   
   // Voice/Audio APIs
   piperTTSEnabled: boolean("piper_tts_enabled").default(true),
