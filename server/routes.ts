@@ -5,7 +5,7 @@ import { WebSocketServer } from "ws";
 import { z } from "zod";
 import session from "express-session";
 import memorystore from "memorystore";
-import { generateAIResponse } from "./openRouter";
+import { generateAIResponse } from "./huggingFace";
 import { textToSpeech } from "./piperTTS";
 import { speechToText } from "./whisper";
 import { 
