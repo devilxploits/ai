@@ -168,10 +168,10 @@ export default function ChatModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 flex flex-col">
-      <div className="fixed inset-0 z-50 bg-[#000000b0] flex flex-col">
+    <div className="fixed inset-0 z-50 bg-black/70">
+      <div className="fixed inset-0 z-50 bg-[#000000b0] flex flex-col h-full">
       {/* Chat Header */}
-        <div className="p-4 border-b border-gray-800 flex justify-between items-center bg-dark-lighter">
+        <div className="flex-shrink-0 p-4 border-b border-gray-800 flex justify-between items-center bg-dark-lighter">
           <div className="flex items-center">
             <div className="w-10 h-10 rounded-full overflow-hidden mr-3">
               <img 
@@ -250,7 +250,7 @@ export default function ChatModal() {
         )}
         
         {/* Main Chat Area */}
-        <div className="flex-1 max-w-screen-lg mx-auto w-full flex flex-col">
+        <div className="flex-1 max-w-screen-lg mx-auto w-full flex flex-col overflow-hidden">
           {/* Chat Messages */}
           <div className="flex-1 p-4 md:p-6 overflow-y-auto scrollbar-hide flex flex-col" ref={chatMessagesRef}>
             {isLoadingHistory ? (
@@ -314,13 +314,13 @@ export default function ChatModal() {
           
           {/* Login Message for Non-authenticated Users */}
           {!user && (
-            <div className="bg-primary/20 border border-primary/40 rounded-lg p-3 mb-4 mx-4 md:mx-6 text-center">
+            <div className="flex-shrink-0 bg-primary/20 border border-primary/40 rounded-lg p-3 mb-4 mx-4 md:mx-6 text-center">
               <p className="text-white font-medium">Please login to chat with Sophia</p>
             </div>
           )}
           
-          {/* Input Area */}
-          <div className="p-4 md:p-6 border-t border-gray-800 bg-dark-lighter">
+          {/* Input Area - Fixed at bottom */}
+          <div className="flex-shrink-0 p-4 md:p-6 border-t border-gray-800 bg-dark-lighter">
             <div className="max-w-screen-lg mx-auto flex items-center">
               <CustomChatInput
                 value={inputMessage}
