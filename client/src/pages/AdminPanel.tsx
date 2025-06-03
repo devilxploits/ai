@@ -25,12 +25,13 @@ export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState<string>('ai-settings');
   
   // API Configuration states
-  // Hugging Face API
-  const [huggingFaceApiKey, setHuggingFaceApiKey] = useState<string>("");
+  // OpenRouter API
+  const [openRouterApiKey, setOpenRouterApiKey] = useState<string>("");
   
   // AI Models
-  const [useDialoGPT, setUseDialoGPT] = useState<boolean>(true);
-  const [useBlenderBot, setUseBlenderBot] = useState<boolean>(true);
+  const [useMythoMax, setUseMythoMax] = useState<boolean>(true);
+  const [useOpenHermes, setUseOpenHermes] = useState<boolean>(true);
+  const [useDeepseek, setUseDeepseek] = useState<boolean>(true);
   
   // Voice/Audio APIs
   const [piperTTSEnabled, setPiperTTSEnabled] = useState<boolean>(true);
@@ -127,12 +128,13 @@ export default function AdminPanel() {
       setFreeMessageLimit(settings.freeMessageLimit || 1);
       
       // API Configuration settings
-      // Hugging Face API
-      setHuggingFaceApiKey(settings.huggingFaceApiKey || "");
+      // OpenRouter API
+      setOpenRouterApiKey(settings.openRouterApiKey || "");
       
       // AI Models
-      setUseDialoGPT(settings.useDialoGPT === false ? false : true);
-      setUseBlenderBot(settings.useBlenderBot === false ? false : true);
+      setUseMythoMax(settings.useMythoMax === false ? false : true);
+      setUseOpenHermes(settings.useOpenHermes === false ? false : true);
+      setUseDeepseek(settings.useDeepseek === false ? false : true);
       
       // Voice/Audio APIs
       setPiperTTSEnabled(settings.piperTTSEnabled === false ? false : true);
@@ -296,12 +298,13 @@ export default function AdminPanel() {
     });
     
     updateSettingsMutation.mutate({
-      // Hugging Face API
-      huggingFaceApiKey,
+      // OpenRouter API
+      openRouterApiKey,
       
       // AI Models
-      useDialoGPT,
-      useBlenderBot,
+      useMythoMax,
+      useOpenHermes,
+      useDeepseek,
       
       // Voice/Audio APIs
       piperTTSEnabled,
@@ -1202,21 +1205,21 @@ Priority support"
           </CardHeader>
           <CardContent className="px-3 md:px-6 py-2 md:py-4 space-y-4">
             
-            {/* Hugging Face API Section */}
+            {/* OpenRouter API Section */}
             <div className="p-4 bg-gray-800 rounded-lg space-y-4">
-              <h3 className="text-lg font-medium">Hugging Face API</h3>
-              <p className="text-sm text-gray-400">Configure Hugging Face for AI text generation using conversational models.</p>
+              <h3 className="text-lg font-medium">OpenRouter API</h3>
+              <p className="text-sm text-gray-400">Configure OpenRouter for AI text generation. Only NSFW-compatible models will be used.</p>
               
               <div className="space-y-2">
-                <Label htmlFor="huggingface-api-key">Hugging Face API Key</Label>
+                <Label htmlFor="openrouter-api-key">OpenRouter API Key</Label>
                 <Input 
-                  id="huggingface-api-key" 
+                  id="openrouter-api-key" 
                   type="password"
-                  value={huggingFaceApiKey}
-                  onChange={(e) => setHuggingFaceApiKey(e.target.value)}
-                  placeholder="hf_..." 
+                  value={openRouterApiKey}
+                  onChange={(e) => setOpenRouterApiKey(e.target.value)}
+                  placeholder="sk-or-..." 
                 />
-                <p className="text-xs text-gray-500">Get your API key from <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">huggingface.co/settings/tokens</a></p>
+                <p className="text-xs text-gray-500">Get your API key from <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">openrouter.ai/keys</a></p>
               </div>
               
               <div className="space-y-2">
@@ -1224,21 +1227,28 @@ Priority support"
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
                     <Switch 
-                      id="model-dialogpt" 
-                      checked={useDialoGPT}
-                      onCheckedChange={setUseDialoGPT}
+                      id="model-mythomax" 
+                      checked={useMythoMax}
+                      onCheckedChange={setUseMythoMax}
                     />
-                    <Label htmlFor="model-dialogpt">DialoGPT (Conversational AI)</Label>
+                    <Label htmlFor="model-mythomax">MythoMax-L2 (Best for explicit content)</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Switch 
-                      id="model-blenderbot" 
-                      checked={useBlenderBot}
-                      onCheckedChange={setUseBlenderBot}
+                      id="model-openhermes" 
+                      checked={useOpenHermes}
+                      onCheckedChange={setUseOpenHermes}
                     />
-                    <Label htmlFor="model-blenderbot">BlenderBot (Human-like conversations)</Label>
+                    <Label htmlFor="model-openhermes">OpenHermes-2.5-Mistral (Balanced conversations)</Label>
                   </div>
-
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="model-deepseek" 
+                      checked={useDeepseek}
+                      onCheckedChange={setUseDeepseek}
+                    />
+                    <Label htmlFor="model-deepseek">Deepseek-Chat-7B-NSFW (General conversation)</Label>
+                  </div>
                 </div>
               </div>
             </div>
